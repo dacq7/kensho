@@ -1,0 +1,90 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Rol {
+  SENSEI
+  KARATECA
+}
+
+enum CategoriaInventario {
+  PROTECCION
+  INSTRUMENTO
+}
+
+enum EstadoInventario {
+  BUENO
+  REGULAR
+  MALO
+}
+
+model User {
+  id               Int          @id @default(autoincrement())
+  nombre           String
+  email            String       @unique
+  password         String
+  rol              Rol
+  telefono         String?
+  fechaNacimiento  DateTime?
+  fechaIngreso     DateTime     @default(now())
+  createdAt        DateTime     @default(now())
+  karateca         Karateca?
+  asistenciasRegistradas Asistencia[] @relation("RegistradoPor")
+}
+
+model Karateca {
+  id                  Int            @id @default(autoincrement())
+  userId              Int            @unique
+  user                User           @relation(fields: [userId], references: [id])
+  kyuActual           String         @default("8kyu")
+  dan                 Int?
+  preExamenAprobado   Boolean        @default(false)
+  fechaUltimoAscenso  DateTime?
+  asistencias         Asistencia[]
+  mensualidades       Mensualidad[]
+  polizas             Poliza[]
+}
+
+model Asistencia {
+  id              Int       @id @default(autoincrement())
+  karatecaId      Int
+  karateca        Karateca  @relation(fields: [karatecaId], references: [id])
+  fecha           DateTime
+  presente        Boolean
+  registradoPorId Int
+  registradoPor   User      @relation("RegistradoPor", fields: [registradoPorId], references: [id])
+}
+
+model Mensualidad {
+  id          Int       @id @default(autoincrement())
+  karatecaId  Int
+  karateca    Karateca  @relation(fields: [karatecaId], references: [id])
+  mes         String
+  monto       Decimal
+  pagado      Boolean   @default(false)
+  fechaPago   DateTime?
+}
+
+model Poliza {
+  id                Int       @id @default(autoincrement())
+  karatecaId        Int
+  karateca          Karateca  @relation(fields: [karatecaId], references: [id])
+  aseguradora       String
+  numeroPoliza      String
+  fechaInicio       DateTime
+  fechaVencimiento  DateTime
+}
+
+model Inventario {
+  id         Int                  @id @default(autoincrement())
+  nombre     String
+  categoria  CategoriaInventario
+  cantidad   Int
+  estado     EstadoInventario
+  notas      String?
+  updatedAt  DateTime             @updatedAt
+}
