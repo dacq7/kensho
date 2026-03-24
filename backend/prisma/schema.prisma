@@ -90,3 +90,10 @@ model Inventario {
   notas      String?
   updatedAt  DateTime             @updatedAt
 }
+
+model Config {
+  id        Int      @id @default(autoincrement())
+  clave     String   @unique
+  valor     String
+  updatedAt DateTime @updatedAt
+}

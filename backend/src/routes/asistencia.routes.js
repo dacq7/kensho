@@ -5,8 +5,9 @@ const requireRole = require('../middlewares/role.middleware');
 
 const router = express.Router();
 
+router.get('/fechas', authMiddleware, asistenciaController.getFechas);
+router.get('/fecha', authMiddleware, asistenciaController.getByFecha);
 router.get('/karateca/:id', authMiddleware, asistenciaController.getByKarateca);
-router.get('/hoy', authMiddleware, asistenciaController.getHoy);
 router.post('/', authMiddleware, requireRole('SENSEI'), asistenciaController.registrar);
 
 module.exports = router;

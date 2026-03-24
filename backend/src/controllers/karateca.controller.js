@@ -1,13 +1,16 @@
 const bcrypt = require('bcryptjs');
 const { prisma } = require('../lib/prisma');
 
-const userIncludeBasico = {
+const userSelectPublic = {
   select: {
+    id: true,
     nombre: true,
     email: true,
+    rol: true,
     telefono: true,
     fechaNacimiento: true,
     fechaIngreso: true,
+    createdAt: true,
   },
 };
 
@@ -17,7 +20,7 @@ async function getAll(req, res) {
     const karatecas = await prisma.karateca.findMany({
       where: incluirInactivos ? undefined : { activo: true },
       include: {
-        user: userIncludeBasico,
+        user: userSelectPublic,
         polizas: true,
       },
       orderBy: { id: 'asc' },
@@ -39,9 +42,7 @@ async function getById(req, res) {
     const karateca = await prisma.karateca.findUnique({
       where: { id },
       include: {
-        user: {
-          omit: { password: true },
-        },
+        user: userSelectPublic,
         asistencias: {
           orderBy: { fecha: 'desc' },
           include: {
@@ -61,6 +62,7 @@ async function getById(req, res) {
 
     return res.json(karateca);
   } catch (err) {
+    console.error('ERROR getById:', err);
     return res.status(500).json({ message: 'Error del servidor' });
   }
 }
@@ -88,9 +90,7 @@ async function create(req, res) {
       const k = await tx.karateca.create({
         data: { userId: user.id },
         include: {
-          user: {
-            omit: { password: true },
-          },
+          user: userSelectPublic,
         },
       });
       return k;
@@ -101,6 +101,7 @@ async function create(req, res) {
     if (err.code === 'P2002') {
       return res.status(409).json({ message: 'El email ya está registrado' });
     }
+    console.error('ERROR create:', err);
     return res.status(500).json({ message: 'Error del servidor' });
   }
 }
@@ -128,11 +129,12 @@ async function update(req, res) {
           fechaNacimiento: fechaNacimiento ? new Date(fechaNacimiento) : null,
         }),
       },
-      omit: { password: true },
+      ...userSelectPublic,
     });
 
     return res.json(user);
   } catch (err) {
+    console.error('ERROR update:', err);
     return res.status(500).json({ message: 'Error del servidor' });
   }
 }
@@ -164,6 +166,7 @@ async function updateKyu(req, res) {
     if (err.code === 'P2025') {
       return res.status(404).json({ message: 'Karateca no encontrado' });
     }
+    console.error('ERROR updateKyu:', err);
     return res.status(500).json({ message: 'Error del servidor' });
   }
 }
@@ -190,6 +193,7 @@ async function updatePreExamen(req, res) {
     if (err.code === 'P2025') {
       return res.status(404).json({ message: 'Karateca no encontrado' });
     }
+    console.error('ERROR updatePreExamen:', err);
     return res.status(500).json({ message: 'Error del servidor' });
   }
 }
@@ -210,7 +214,7 @@ async function toggleActivo(req, res) {
       where: { id },
       data: { activo },
       include: {
-        user: userIncludeBasico,
+        user: userSelectPublic,
         polizas: true,
       },
     });
@@ -252,6 +256,7 @@ async function remove(req, res) {
     if (err.message === 'NOT_FOUND') {
       return res.status(404).json({ message: 'Karateca no encontrado' });
     }
+    console.error('ERROR remove:', err);
     return res.status(500).json({ message: 'Error del servidor' });
   }
 }

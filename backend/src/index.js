@@ -6,6 +6,7 @@ const authRoutes = require('./routes/auth.routes');
 const karatecaRoutes = require('./routes/karateca.routes');
 const asistenciaRoutes = require('./routes/asistencia.routes');
 const mensualidadRoutes = require('./routes/mensualidad.routes');
+const configRoutes = require('./routes/config.routes');
 const polizaRoutes = require('./routes/poliza.routes');
 const inventarioRoutes = require('./routes/inventario.routes');
 
@@ -20,6 +21,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/karatecas', karatecaRoutes);
 app.use('/api/asistencias', asistenciaRoutes);
 app.use('/api/mensualidades', mensualidadRoutes);
+app.use('/api/config', configRoutes);
 app.use('/api/polizas', polizaRoutes);
 app.use('/api/inventario', inventarioRoutes);
 
