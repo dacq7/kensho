@@ -13,7 +13,9 @@ const userIncludeBasico = {
 
 async function getAll(req, res) {
   try {
+    const incluirInactivos = String(req.query.incluirInactivos || '').toLowerCase() === 'true';
     const karatecas = await prisma.karateca.findMany({
+      where: incluirInactivos ? undefined : { activo: true },
       include: {
         user: userIncludeBasico,
         polizas: true,
@@ -22,7 +24,8 @@ async function getAll(req, res) {
     });
     return res.json(karatecas);
   } catch (err) {
-    return res.status(500).json({ message: 'Error del servidor' });
+    console.error('ERROR getAll:', err);
+    return res.status(500).json({ message: 'Error del servidor', detail: err.message });
   }
 }
 
@@ -191,6 +194,68 @@ async function updatePreExamen(req, res) {
   }
 }
 
+async function toggleActivo(req, res) {
+  try {
+    const id = Number.parseInt(req.params.id, 10);
+    if (Number.isNaN(id)) {
+      return res.status(400).json({ message: 'ID inválido' });
+    }
+
+    const { activo } = req.body;
+    if (typeof activo !== 'boolean') {
+      return res.status(400).json({ message: 'activo debe ser booleano' });
+    }
+
+    const karateca = await prisma.karateca.update({
+      where: { id },
+      data: { activo },
+      include: {
+        user: userIncludeBasico,
+        polizas: true,
+      },
+    });
+
+    return res.json(karateca);
+  } catch (err) {
+    if (err.code === 'P2025') {
+      return res.status(404).json({ message: 'Karateca no encontrado' });
+    }
+    console.error('ERROR toggleActivo:', err);
+    return res.status(500).json({ message: 'Error del servidor', detail: err.message });
+  }
+}
+
+async function remove(req, res) {
+  try {
+    const id = Number.parseInt(req.params.id, 10);
+    if (Number.isNaN(id)) {
+      return res.status(400).json({ message: 'ID inválido' });
+    }
+
+    await prisma.$transaction(async (tx) => {
+      const karateca = await tx.karateca.findUnique({ where: { id } });
+      if (!karateca) {
+        const error = new Error('NOT_FOUND');
+        error.status = 404;
+        throw error;
+      }
+
+      await tx.asistencia.deleteMany({ where: { karatecaId: id } });
+      await tx.mensualidad.deleteMany({ where: { karatecaId: id } });
+      await tx.poliza.deleteMany({ where: { karatecaId: id } });
+      await tx.karateca.delete({ where: { id } });
+      await tx.user.delete({ where: { id: karateca.userId } });
+    });
+
+    return res.status(204).send();
+  } catch (err) {
+    if (err.message === 'NOT_FOUND') {
+      return res.status(404).json({ message: 'Karateca no encontrado' });
+    }
+    return res.status(500).json({ message: 'Error del servidor' });
+  }
+}
+
 module.exports = {
   getAll,
   getById,
@@ -198,4 +263,6 @@ module.exports = {
   update,
   updateKyu,
   updatePreExamen,
+  toggleActivo,
+  remove,
 };

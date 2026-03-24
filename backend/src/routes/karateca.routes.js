@@ -16,5 +16,7 @@ router.patch(
   requireRole('SENSEI'),
   karatecaController.updatePreExamen,
 );
+router.patch('/:id/activo', authMiddleware, requireRole('SENSEI'), karatecaController.toggleActivo);
+router.delete('/:id', authMiddleware, requireRole('SENSEI'), karatecaController.remove);
 
 module.exports = router;

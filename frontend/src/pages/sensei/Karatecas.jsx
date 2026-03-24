@@ -2,16 +2,10 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Pencil, Plus, X } from 'lucide-react';
+import { Pencil, Plus, ToggleLeft, ToggleRight, Trash2, X } from 'lucide-react';
 import api from '../../lib/api';
 import useAuthStore from '../../store/authStore';
-import {
-  KYU_ORDER,
-  getHigherKyuOptions,
-  kyuBadgeProps,
-  kyuLabel,
-  normalizeKyu,
-} from '../../lib/kyuUtils';
+import { GRADO_INFO, GRADO_ORDER, KyuBadge } from '../../lib/kyuUtils';
 
 const createSchema = z.object({
   nombre: z.string().min(1, 'El nombre es obligatorio'),
@@ -45,13 +39,17 @@ function polizaEstado(polizas) {
   return end >= today ? 'activa' : 'vencida';
 }
 
-function KyuBadge({ kyu, dan }) {
-  const { className, label, style } = kyuBadgeProps(kyu, dan);
-  return (
-    <span className={className} style={style}>
-      {label}
-    </span>
-  );
+function gradoValue(row) {
+  if (typeof row.dan === 'number' && row.dan >= 1) return `${row.dan}dan`;
+  return row.kyuActual;
+}
+
+function gradoLabel(grado) {
+  return GRADO_INFO[grado]?.label || grado;
+}
+
+function isActiveRow(row) {
+  return row.activo !== false;
 }
 
 export default function SenseiKaratecasPage() {
@@ -74,7 +72,7 @@ export default function SenseiKaratecasPage() {
   const load = useCallback(async () => {
     setError(null);
     try {
-      const { data } = await api.get('/karatecas');
+      const { data } = await api.get('/karatecas?incluirInactivos=true');
       setRows(Array.isArray(data) ? data : []);
     } catch (e) {
       setError(e.response?.data?.message || 'No se pudo cargar la lista');
@@ -90,7 +88,7 @@ export default function SenseiKaratecasPage() {
 
   const filtered = useMemo(() => {
     return rows.filter((r) => {
-      if (filterKyu !== 'all' && normalizeKyu(r.kyuActual) !== filterKyu) {
+      if (filterKyu !== 'all' && gradoValue(r) !== filterKyu) {
         return false;
       }
       const pe = polizaEstado(r.polizas);
@@ -127,8 +125,7 @@ export default function SenseiKaratecasPage() {
       telefono: u.telefono ?? '',
       fechaNacimiento: fn,
     });
-    const opts = getHigherKyuOptions(editing.kyuActual);
-    setAscensoTarget(opts[0] ?? '');
+    setAscensoTarget(gradoValue(editing) || GRADO_ORDER[0]);
   }, [editing, editForm]);
 
   const closeModals = () => {
@@ -189,6 +186,32 @@ export default function SenseiKaratecasPage() {
       setError(e.response?.data?.message || 'No se pudo registrar el ascenso');
     } finally {
       setSavingAscenso(false);
+    }
+  };
+
+  const toggleActivo = async (row) => {
+    setError(null);
+    try {
+      await api.patch(`/karatecas/${row.id}/activo`, { activo: !isActiveRow(row) });
+      await load();
+      setEditing((prev) => (
+        prev && prev.id === row.id ? { ...prev, activo: !isActiveRow(row) } : prev
+      ));
+    } catch (e) {
+      setError(e.response?.data?.message || 'No se pudo cambiar el estado');
+    }
+  };
+
+  const eliminarKarateca = async (row) => {
+    const ok = window.confirm('¿Estás seguro? Esta acción no se puede deshacer');
+    if (!ok) return;
+    setError(null);
+    try {
+      await api.delete(`/karatecas/${row.id}`);
+      if (editing?.id === row.id) closeModals();
+      await load();
+    } catch (e) {
+      setError(e.response?.data?.message || 'No se pudo eliminar el karateca');
     }
   };
 
@@ -254,9 +277,9 @@ export default function SenseiKaratecasPage() {
             className="rounded-md border border-white/15 bg-[#111111] px-3 py-2 text-sm text-white focus:border-[#C9A84C] focus:outline-none focus:ring-1 focus:ring-[#C9A84C]"
           >
             <option value="all">Todos</option>
-            {KYU_ORDER.map((k) => (
+            {GRADO_ORDER.map((k) => (
               <option key={k} value={k}>
-                {kyuLabel(k)}
+                {gradoLabel(k)}
               </option>
             ))}
           </select>
@@ -309,16 +332,31 @@ export default function SenseiKaratecasPage() {
                 filtered.map((row) => {
                   const pe = polizaEstado(row.polizas);
                   return (
-                    <tr key={row.id} className="hover:bg-white/[0.03]">
+                    <tr
+                      key={row.id}
+                      className={[
+                        'hover:bg-white/[0.03]',
+                        isActiveRow(row) ? '' : 'bg-white/[0.04] text-white/50',
+                      ].join(' ')}
+                    >
                       <td className="px-4 py-3 font-medium text-white">
-                        {row.user?.nombre}
+                        <div className="flex items-center gap-2">
+                          <span className={isActiveRow(row) ? 'text-white' : 'text-white/70'}>
+                            {row.user?.nombre}
+                          </span>
+                          {!isActiveRow(row) && (
+                            <span className="rounded-full bg-white/15 px-2 py-0.5 text-[11px] font-medium text-white/70">
+                              Inactivo
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-4 py-3 text-white/75">{row.user?.email}</td>
                       <td className="px-4 py-3 text-white/75">
                         {row.user?.telefono || '—'}
                       </td>
                       <td className="px-4 py-3">
-                        <KyuBadge kyu={row.kyuActual} dan={row.dan} />
+                        <KyuBadge kyu={gradoValue(row)} />
                       </td>
                       <td className="px-4 py-3">
                         {row.preExamenAprobado ? (
@@ -358,6 +396,28 @@ export default function SenseiKaratecasPage() {
                         >
                           <Pencil className="h-3.5 w-3.5" />
                           Editar
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => toggleActivo(row)}
+                          className="ml-2 inline-flex items-center gap-1 rounded-md border border-white/20 px-2.5 py-1.5 text-xs font-medium text-white/70 hover:bg-white/10"
+                          title={isActiveRow(row) ? 'Desactivar' : 'Activar'}
+                        >
+                          {isActiveRow(row) ? (
+                            <ToggleLeft className="h-3.5 w-3.5 text-gray-400" />
+                          ) : (
+                            <ToggleRight className="h-3.5 w-3.5 text-emerald-400" />
+                          )}
+                          {isActiveRow(row) ? 'Desactivar' : 'Activar'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => eliminarKarateca(row)}
+                          className="ml-2 inline-flex items-center gap-1 rounded-md border border-[#CC0000]/40 px-2.5 py-1.5 text-xs font-medium text-[#f08e8e] hover:bg-[#CC0000]/20"
+                          title="Eliminar"
+                        >
+                          <Trash2 className="h-3.5 w-3.5 text-[#CC0000]" />
+                          Eliminar
                         </button>
                       </td>
                     </tr>
@@ -571,36 +631,28 @@ export default function SenseiKaratecasPage() {
                 </h3>
                 <p className="mt-1 text-xs text-white/50">
                   Grado actual:{' '}
-                  <KyuBadge kyu={editing.kyuActual} dan={editing.dan} />
+                  <KyuBadge kyu={gradoValue(editing)} />
                 </p>
                 <div className="mt-3 flex flex-wrap items-end gap-2">
                   <div className="min-w-[180px] flex-1">
                     <label className="mb-1 block text-xs text-white/60">
-                      Siguiente grado
+                      Grado
                     </label>
                     <select
                       value={ascensoTarget}
                       onChange={(e) => setAscensoTarget(e.target.value)}
                       className="w-full rounded-md border border-white/15 bg-[#111111] px-3 py-2 text-sm text-white focus:border-[#C9A84C] focus:outline-none focus:ring-1 focus:ring-[#C9A84C]"
                     >
-                      {getHigherKyuOptions(editing.kyuActual).length === 0 ? (
-                        <option value="">— Sin ascensos disponibles —</option>
-                      ) : (
-                        getHigherKyuOptions(editing.kyuActual).map((k) => (
-                          <option key={k} value={k}>
-                            {kyuLabel(k)}
-                          </option>
-                        ))
-                      )}
+                      {GRADO_ORDER.map((k) => (
+                        <option key={k} value={k}>
+                          {gradoLabel(k)}
+                        </option>
+                      ))}
                     </select>
                   </div>
                   <button
                     type="button"
-                    disabled={
-                      savingAscenso ||
-                      !ascensoTarget ||
-                      getHigherKyuOptions(editing.kyuActual).length === 0
-                    }
+                    disabled={savingAscenso || !ascensoTarget}
                     onClick={confirmarAscenso}
                     className="rounded-md border border-[#C9A84C]/50 bg-[#111111] px-4 py-2 text-sm font-medium text-[#C9A84C] hover:bg-[#C9A84C]/10 disabled:opacity-40"
                   >
