@@ -8,6 +8,8 @@ const router = express.Router();
 router.get('/', authMiddleware, polizaController.getAll);
 router.get('/karateca/:id', authMiddleware, polizaController.getByKarateca);
 router.post('/', authMiddleware, requireRole('SENSEI'), polizaController.create);
+router.delete('/karateca/:id', authMiddleware, requireRole('SENSEI'), polizaController.removeAll);
 router.put('/:id', authMiddleware, requireRole('SENSEI'), polizaController.update);
+router.delete('/:id', authMiddleware, requireRole('SENSEI'), polizaController.remove);
 
 module.exports = router;
