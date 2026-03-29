@@ -9,6 +9,7 @@ const mensualidadRoutes = require('./routes/mensualidad.routes');
 const configRoutes = require('./routes/config.routes');
 const polizaRoutes = require('./routes/poliza.routes');
 const inventarioRoutes = require('./routes/inventario.routes');
+const dashboardRoutes = require('./routes/dashboard.routes');
 
 const PORT = process.env.PORT || 3001;
 
@@ -24,6 +25,7 @@ app.use('/api/mensualidades', mensualidadRoutes);
 app.use('/api/config', configRoutes);
 app.use('/api/polizas', polizaRoutes);
 app.use('/api/inventario', inventarioRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
