@@ -5,11 +5,9 @@ const requireRole = require('../middlewares/role.middleware');
 
 const router = express.Router();
 
-const sensei = [authMiddleware, requireRole('SENSEI')];
-
-router.get('/', ...sensei, inventarioController.getAll);
-router.post('/', ...sensei, inventarioController.create);
-router.put('/:id', ...sensei, inventarioController.update);
-router.delete('/:id', ...sensei, inventarioController.remove);
+router.get('/', authMiddleware, inventarioController.getAll);
+router.post('/', authMiddleware, requireRole('SENSEI'), inventarioController.create);
+router.put('/:id', authMiddleware, requireRole('SENSEI'), inventarioController.update);
+router.delete('/:id', authMiddleware, requireRole('SENSEI'), inventarioController.remove);
 
 module.exports = router;
