@@ -25,6 +25,26 @@ function estadoPoliza(fechaVencimiento) {
   return 'activa';
 }
 
+function addMonthsYm(ym, delta) {
+  const [y, m] = ym.split('-').map(Number);
+  const d = new Date(y, m - 1 + delta, 1);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+}
+
+function ultimos6MesesDesc() {
+  const mes = mesActualString();
+  const list = [mes];
+  for (let i = 1; i < 6; i += 1) {
+    list.push(addMonthsYm(mes, -i));
+  }
+  return list.sort((a, b) => b.localeCompare(a));
+}
+
+function decimalToNum(monto) {
+  if (monto == null) return null;
+  return Number(String(monto));
+}
+
 function karatecaResumen(k) {
   return {
     karatecaId: k.id,
@@ -147,6 +167,116 @@ async function getResumen(req, res) {
   }
 }
 
+const userKaratecaDashboardSelect = {
+  select: {
+    nombre: true,
+    email: true,
+    telefono: true,
+    fechaNacimiento: true,
+    fechaIngreso: true,
+  },
+};
+
+async function getResumenKarateca(req, res) {
+  try {
+    const userId = req.user?.userId;
+    if (userId == null) {
+      return res.status(401).json({ message: 'No autorizado' });
+    }
+
+    const karateca = await prisma.karateca.findUnique({
+      where: { userId },
+      include: {
+        user: userKaratecaDashboardSelect,
+      },
+    });
+
+    if (!karateca) {
+      return res.status(404).json({ message: 'Karateca no encontrado' });
+    }
+
+    const [asistenciaRows, mensualidadesKarateca, polizaReciente] = await Promise.all([
+      prisma.asistencia.findMany({
+        select: { fecha: true, karatecaId: true, presente: true },
+      }),
+      prisma.mensualidad.findMany({
+        where: { karatecaId: karateca.id },
+        orderBy: { mes: 'desc' },
+      }),
+      prisma.poliza.findFirst({
+        where: { karatecaId: karateca.id },
+        orderBy: { fechaVencimiento: 'desc' },
+      }),
+    ]);
+
+    const diasGlobales = new Set();
+    const presentesKarateca = new Set();
+    for (const r of asistenciaRows) {
+      const key = ymdLocal(r.fecha);
+      diasGlobales.add(key);
+      if (r.karatecaId === karateca.id && r.presente) {
+        presentesKarateca.add(key);
+      }
+    }
+    const totalClases = diasGlobales.size;
+    const clasesAsistidas = presentesKarateca.size;
+    const promedioAsistencia =
+      totalClases === 0 ? 0 : Math.round((clasesAsistidas / totalClases) * 100);
+
+    const mesesVentana = ultimos6MesesDesc();
+    const mensMap = new Map(mensualidadesKarateca.map((m) => [m.mes, m]));
+    const mensualidades = mesesVentana.map((mes) => {
+      const m = mensMap.get(mes);
+      if (!m) {
+        return {
+          mes,
+          pagado: false,
+          monto: null,
+          fechaPago: null,
+        };
+      }
+      return {
+        mes: m.mes,
+        pagado: m.pagado,
+        monto: decimalToNum(m.monto),
+        fechaPago: m.fechaPago,
+      };
+    });
+
+    let poliza = null;
+    if (polizaReciente) {
+      poliza = {
+        aseguradora: polizaReciente.aseguradora,
+        numeroPoliza: polizaReciente.numeroPoliza,
+        fechaInicio: polizaReciente.fechaInicio,
+        fechaVencimiento: polizaReciente.fechaVencimiento,
+        estado: estadoPoliza(polizaReciente.fechaVencimiento),
+      };
+    }
+
+    return res.json({
+      karateca: {
+        id: karateca.id,
+        kyuActual: karateca.kyuActual,
+        preExamenAprobado: karateca.preExamenAprobado,
+        fechaUltimoAscenso: karateca.fechaUltimoAscenso,
+        user: karateca.user,
+      },
+      asistencia: {
+        promedio: promedioAsistencia,
+        totalClases,
+        clasesAsistidas,
+      },
+      mensualidades,
+      poliza,
+    });
+  } catch (err) {
+    console.error('ERROR dashboard.getResumenKarateca:', err);
+    return res.status(500).json({ message: 'Error del servidor' });
+  }
+}
+
 module.exports = {
   getResumen,
+  getResumenKarateca,
 };
