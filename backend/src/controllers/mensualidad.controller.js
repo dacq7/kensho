@@ -71,7 +71,12 @@ async function getByMes(req, res) {
       orderBy: { id: 'asc' },
     });
 
-    const resultado = karatecas.map((k) => {
+    const karatecasFiltrados = karatecas.filter((k) => {
+      if (!k.mesInicioMensualidades) return true;
+      return mes >= k.mesInicioMensualidades;
+    });
+
+    const resultado = karatecasFiltrados.map((k) => {
       const m = k.mensualidades[0];
       const pagado = m ? m.pagado : null;
       return {
@@ -115,6 +120,12 @@ async function registrarPago(req, res) {
     });
     if (!karateca) {
       return res.status(404).json({ message: 'Karateca activo no encontrado' });
+    }
+
+    if (karateca.mesInicioMensualidades && mes < karateca.mesInicioMensualidades) {
+      return res.status(400).json({
+        message: 'Este mes es anterior al inicio de mensualidades del karateca',
+      });
     }
 
     const fecha = parseFechaPagoInput(fechaPago);

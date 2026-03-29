@@ -203,11 +203,13 @@ export default function SenseiMensualidadesPage() {
   );
 
   return (
-    <div style={{ minHeight: '100%', background: DOJO.negro, color: '#eee', padding: '1.5rem' }}>
+    <div className="p-3 text-[#eee] md:p-6 lg:p-8" style={{ minHeight: '100%', background: DOJO.negro }}>
       {/* Parte 1 — Header */}
-      <header style={{ borderBottom: `2px solid ${DOJO.dorado}`, paddingBottom: '1rem', marginBottom: '1.25rem' }}>
-        <h1 style={{ margin: '0 0 1rem', fontSize: '1.5rem', color: DOJO.dorado }}>Mensualidades</h1>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'flex-end' }}>
+      <header className="mb-4 border-b pb-4 md:mb-5" style={{ borderColor: DOJO.dorado }}>
+        <h1 className="mb-3 text-lg font-semibold md:text-xl lg:text-2xl" style={{ color: DOJO.dorado }}>
+          Mensualidades
+        </h1>
+        <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:gap-4">
           <label style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
             <span style={{ fontSize: '0.8rem', color: '#aaa' }}>Valor global de la mensualidad</span>
             <input
@@ -230,13 +232,9 @@ export default function SenseiMensualidadesPage() {
             type="button"
             onClick={guardarConfig}
             disabled={configSaving || configLoading}
+            className="min-h-[44px] w-full rounded-md border-0 font-bold text-white sm:w-auto sm:px-4"
             style={{
-              padding: '0.5rem 1rem',
-              borderRadius: 6,
-              border: 'none',
               background: DOJO.rojo,
-              color: '#fff',
-              fontWeight: 700,
               cursor: configSaving || configLoading ? 'not-allowed' : 'pointer',
               opacity: configSaving || configLoading ? 0.6 : 1,
             }}
@@ -294,21 +292,68 @@ export default function SenseiMensualidadesPage() {
         </div>
       )}
 
-      {/* Parte 2 — Tabla */}
+      {/* Parte 2 — Cards móvil / Tabla desktop */}
       <section
+        className="mb-4 md:mb-5"
         style={{
           background: '#1a1a1a',
           border: `1px solid ${DOJO.dorado}`,
           borderRadius: 8,
           padding: '1rem',
-          marginBottom: '1.25rem',
         }}
       >
         {listaLoading ? (
           <p style={{ color: '#888', margin: 0 }}>Cargando…</p>
         ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+          <>
+            <div className="space-y-3 lg:hidden">
+              {filas.map((row) => {
+                const pagado = row.mensualidad?.pagado === true;
+                const enMora = row.enMora === true && !pagado;
+                return (
+                  <div
+                    key={row.karatecaId}
+                    className="rounded-lg border border-[#333] bg-[#141414] p-4"
+                  >
+                    <div className="mb-2 font-semibold text-white">
+                      {row.user?.nombre ?? `#${row.karatecaId}`}
+                    </div>
+                    <div className="mb-2">
+                      <KyuBadge kyu={gradoValue(row)} />
+                    </div>
+                    <div className="mb-2 flex flex-wrap gap-2">
+                      {pagado
+                        ? badge('✓ Pagado', '#1a4d2e', '#9f9')
+                        : badge('✗ Pendiente', 'rgba(204,0,0,0.35)', '#faa')}
+                      {enMora && badge('⚠ En mora', '#b35900', '#fff')}
+                    </div>
+                    <p className="mb-1 text-sm text-[#ccc]">Monto: {row.mensualidad?.monto ?? '—'}</p>
+                    <p className="mb-3 text-xs text-[#888]">{formatFechaPago(row.mensualidad?.fechaPago)}</p>
+                    {!pagado ? (
+                      <button
+                        type="button"
+                        onClick={() => abrirModalPago(row)}
+                        className="min-h-[44px] w-full rounded-md border-0 font-semibold text-white"
+                        style={{ background: DOJO.rojo, fontSize: '0.85rem' }}
+                      >
+                        Registrar pago
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setAnularId(row.mensualidad.id)}
+                        className="min-h-[44px] w-full rounded-md border-0 font-semibold"
+                        style={{ background: '#333', color: '#f99', fontSize: '0.85rem' }}
+                      >
+                        Anular pago
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            <div className="hidden overflow-x-auto lg:block">
+            <table className="w-full min-w-[640px] border-collapse text-sm" style={{ fontSize: '0.9rem' }}>
               <thead>
                 <tr style={{ borderBottom: `2px solid ${DOJO.dorado}`, color: DOJO.dorado, textAlign: 'left' }}>
                   <th style={{ padding: '0.5rem' }}>Nombre</th>
@@ -381,7 +426,8 @@ export default function SenseiMensualidadesPage() {
                 })}
               </tbody>
             </table>
-          </div>
+            </div>
+          </>
         )}
       </section>
 
@@ -417,29 +463,14 @@ export default function SenseiMensualidadesPage() {
       {modalRow && (
         <div
           role="presentation"
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0,0,0,0.65)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 50,
-            padding: '1rem',
-          }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 p-0 md:p-4"
           onClick={cerrarModal}
         >
           <div
             role="dialog"
             aria-labelledby="modal-pago-title"
-            style={{
-              background: DOJO.negro,
-              border: `2px solid ${DOJO.dorado}`,
-              borderRadius: 10,
-              padding: '1.25rem',
-              maxWidth: '22rem',
-              width: '100%',
-            }}
+            className="h-full max-h-[100dvh] w-full overflow-y-auto rounded-none border-0 p-4 md:h-auto md:max-h-[90vh] md:max-w-[22rem] md:rounded-[10px] md:border-2 md:p-[1.25rem]"
+            style={{ background: DOJO.negro, borderColor: DOJO.dorado }}
             onClick={(e) => e.stopPropagation()}
           >
             <h2 id="modal-pago-title" style={{ margin: '0 0 1rem', fontSize: '1.1rem', color: DOJO.dorado }}>
@@ -483,19 +514,13 @@ export default function SenseiMensualidadesPage() {
                 }}
               />
             </label>
-            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+            <div className="flex flex-col gap-2 sm:flex-row sm:justify-end sm:gap-2">
               <button
                 type="button"
                 onClick={cerrarModal}
                 disabled={modalSubmitting}
-                style={{
-                  padding: '0.45rem 0.85rem',
-                  borderRadius: 6,
-                  border: '1px solid #555',
-                  background: 'transparent',
-                  color: '#ccc',
-                  cursor: modalSubmitting ? 'not-allowed' : 'pointer',
-                }}
+                className="min-h-[44px] w-full rounded-md border border-[#555] bg-transparent px-4 text-[#ccc] sm:w-auto"
+                style={{ cursor: modalSubmitting ? 'not-allowed' : 'pointer' }}
               >
                 Cancelar
               </button>
@@ -503,13 +528,9 @@ export default function SenseiMensualidadesPage() {
                 type="button"
                 onClick={confirmarPago}
                 disabled={modalSubmitting}
+                className="min-h-[44px] w-full rounded-md border-0 bg-[#CC0000] px-4 font-bold text-white sm:w-auto"
                 style={{
-                  padding: '0.45rem 0.85rem',
-                  borderRadius: 6,
-                  border: 'none',
                   background: DOJO.rojo,
-                  color: '#fff',
-                  fontWeight: 700,
                   cursor: modalSubmitting ? 'not-allowed' : 'pointer',
                   opacity: modalSubmitting ? 0.7 : 1,
                 }}
@@ -525,44 +546,23 @@ export default function SenseiMensualidadesPage() {
       {anularId != null && (
         <div
           role="presentation"
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0,0,0,0.65)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 50,
-            padding: '1rem',
-          }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 p-0 md:p-4"
           onClick={() => !anularSubmitting && setAnularId(null)}
         >
           <div
             role="dialog"
-            style={{
-              background: DOJO.negro,
-              border: `2px solid ${DOJO.rojo}`,
-              borderRadius: 10,
-              padding: '1.25rem',
-              maxWidth: '20rem',
-              width: '100%',
-            }}
+            className="h-full max-h-[100dvh] w-full overflow-y-auto rounded-none border-0 p-4 md:h-auto md:max-w-[20rem] md:rounded-[10px] md:border-2 md:p-[1.25rem]"
+            style={{ background: DOJO.negro, borderColor: DOJO.rojo }}
             onClick={(e) => e.stopPropagation()}
           >
             <p style={{ margin: '0 0 1rem', color: '#eee' }}>¿Anular este pago? La mensualidad quedará pendiente.</p>
-            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+            <div className="flex flex-col gap-2 sm:flex-row sm:justify-end sm:gap-2">
               <button
                 type="button"
                 onClick={() => setAnularId(null)}
                 disabled={anularSubmitting}
-                style={{
-                  padding: '0.45rem 0.85rem',
-                  borderRadius: 6,
-                  border: '1px solid #555',
-                  background: 'transparent',
-                  color: '#ccc',
-                  cursor: anularSubmitting ? 'not-allowed' : 'pointer',
-                }}
+                className="min-h-[44px] w-full rounded-md border border-[#555] bg-transparent px-4 text-[#ccc] sm:w-auto"
+                style={{ cursor: anularSubmitting ? 'not-allowed' : 'pointer' }}
               >
                 Cancelar
               </button>
@@ -570,13 +570,9 @@ export default function SenseiMensualidadesPage() {
                 type="button"
                 onClick={confirmarAnular}
                 disabled={anularSubmitting}
+                className="min-h-[44px] w-full rounded-md border-0 px-4 font-bold text-white sm:w-auto"
                 style={{
-                  padding: '0.45rem 0.85rem',
-                  borderRadius: 6,
-                  border: 'none',
                   background: DOJO.rojo,
-                  color: '#fff',
-                  fontWeight: 700,
                   cursor: anularSubmitting ? 'not-allowed' : 'pointer',
                 }}
               >

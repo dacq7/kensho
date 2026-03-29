@@ -1,24 +1,28 @@
 require('dotenv').config();
 
 const bcrypt = require('bcryptjs');
-const { prisma, pool } = require('../lib/prisma');
+const { prisma } = require('../lib/prisma');
 
 const EMAIL = 'sensei@budokan.com';
 
 async function main() {
-  const existing = await prisma.user.findUnique({ where: { email: EMAIL } });
+  const password = await bcrypt.hash('budokan2025', 10);
 
-  if (!existing) {
-    const password = await bcrypt.hash('budokan2025', 10);
-    await prisma.user.create({
-      data: {
-        nombre: 'Sensei Budokan',
-        email: EMAIL,
-        password,
-        rol: 'SENSEI',
-      },
-    });
-  }
+  await prisma.user.upsert({
+    where: { email: EMAIL },
+    update: {
+      tipoDocumento: 'CC',
+      numeroDocumento: '00000000',
+    },
+    create: {
+      nombre: 'Sensei Budokan',
+      email: EMAIL,
+      password,
+      rol: 'SENSEI',
+      tipoDocumento: 'CC',
+      numeroDocumento: '00000000',
+    },
+  });
 
   console.log('Sensei creado correctamente');
 }
@@ -30,5 +34,4 @@ main()
   })
   .finally(async () => {
     await prisma.$disconnect();
-    await pool.end();
   });

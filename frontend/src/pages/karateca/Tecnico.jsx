@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import api from '../../lib/api';
-import { GRADO_ORDER, KyuBadge } from '../../lib/kyuUtils';
+import { KyuBadge } from '../../lib/kyuUtils';
 
 const DOJO = { negro: '#111111', rojo: '#CC0000', dorado: '#C9A84C' };
 
@@ -8,212 +8,207 @@ const KYU_TECNICO = {
   '8kyu': {
     kata: ['Taikyoku Shodan', 'Taikyoku Nidan', 'Taikyoku Sandan'],
     kumite: [
-      'Gohon Kumite Ichi',
-      'Gohon Kumite Ni',
-      'Gohon Kumite San',
+      'Gohon Kumite (Jōdan, Chūdan, Mae-geri)',
     ],
     kihon: [
-      'Avanza en Zenkutsu-dachi Oi-zuki Chudan',
+      'Avanza en Zenkutsu-dachi Oi-zuki Chūdan',
       'Retrocede en Zenkutsu-dachi Age-uke',
       'Avanza en Zenkutsu-dachi Soto Ude-uke',
-      'Retrocede en Kokutsu-dachi Shuto-uke',
+      'Retrocede en Kōkutsu-dachi Shuto-uke',
       'Avanza en Zenkutsu-dachi Uchi Ude-uke',
       'Retrocede en Zenkutsu-dachi Gedan-barai',
-      'Avanza en Zenkutsu-dachi Mae-geri Chudan Keage',
+      'Avanza en Zenkutsu-dachi Mae-geri Chūdan Keage',
       'Gira y avanza igual',
-      'Avanza en Kiba-dachi Yoko-geri Chudan Keage (izq. y der.)',
-      'Avanza en Kiba-dachi Yoko-geri Chudan Kekomi (izq. y der.)',
+      'Avanza en Kiba-dachi Yoko-geri Chūdan Keage (izq. y der.)',
+      'Avanza en Kiba-dachi Yoko-geri Chūdan Kekomi (izq. y der.)',
     ],
   },
   '7kyu': {
     kata: ['Heian Shodan'],
     kumite: [
-      'Gohon Kumite Ichi, Ni, San',
+      'Gohon Kumite (Jōdan, Chūdan, Mae-geri)',
       'Sanbon Kumite Ichi',
     ],
     kihon: [
-      'Avanza en Zenkutsu-dachi Gyaku-zuki Chudan',
-      'Retrocede en Zenkutsu-dachi Age-uke, Gyaku-zuki Chudan',
-      'Avanza en Zenkutsu-dachi Soto Ude-uke, Gyaku-zuki Chudan',
-      'Retrocede en Kokutsu-dachi Shuto-uke',
-      'Avanza en Zenkutsu-dachi Uchi Ude-uke, Gyaku-zuki Chudan',
-      'Retrocede en Zenkutsu-dachi Gedan-barai, Gyaku-zuki Chudan',
-      'Avanza en Zenkutsu-dachi Mae-geri Chudan Keage',
-      'Gira y avanza en Zenkutsu-dachi Mawashi-geri Chudan Keage',
-      'Avanza en Kiba-dachi Yoko-geri Chudan Keage (izq. y der.)',
-      'Avanza en Kiba-dachi Yoko-geri Chudan Kekomi (izq. y der.)',
+      'Avanza en Zenkutsu-dachi Gyaku-zuki Chūdan',
+      'Retrocede en Zenkutsu-dachi Age-uke, Gyaku-zuki Chūdan',
+      'Avanza en Zenkutsu-dachi Soto Ude-uke, Gyaku-zuki Chūdan',
+      'Retrocede en Kōkutsu-dachi Shuto-uke',
+      'Avanza en Zenkutsu-dachi Uchi Ude-uke, Gyaku-zuki Chūdan',
+      'Retrocede en Zenkutsu-dachi Gedan-barai, Gyaku-zuki Chūdan',
+      'Avanza en Zenkutsu-dachi Mae-geri Chūdan Keage',
+      'Gira y avanza en Zenkutsu-dachi Mawashi-geri Chūdan Keage',
+      'Avanza en Kiba-dachi Yoko-geri Chūdan Keage (izq. y der.)',
+      'Avanza en Kiba-dachi Yoko-geri Chūdan Kekomi (izq. y der.)',
     ],
   },
   '6kyu': {
     kata: ['Heian Nidan'],
     kumite: [
-      'Gohon Kumite Ichi, Ni, San',
+      'Gohon Kumite (Jōdan, Chūdan, Mae-geri)',
       'Sanbon Kumite Ichi, Ni',
     ],
     kihon: [
-      'Avanza en Zenkutsu-dachi Oi-zuki Sanbon-zuki Jodan, Chudan, Chudan',
-      'Retrocede en Zenkutsu-dachi Age-uke, Gyaku-zuki Chudan',
+      'Avanza en Zenkutsu-dachi Oi-zuki Sanbon-zuki Jōdan, Chūdan, Chūdan',
+      'Retrocede en Zenkutsu-dachi Age-uke, Gyaku-zuki Chūdan',
       'Avanza en Zenkutsu-dachi Soto Ude-uke → Kiba-dachi Empi-uchi',
-      'Retrocede en Kokutsu-dachi Shuto-uke → Zenkutsu-dachi Nukite',
-      'Avanza en Zenkutsu-dachi Uchi Ude-uke, Gyaku-zuki Chudan',
-      'Retrocede en Zenkutsu-dachi Gedan-barai, Mae-geri Chudan Keage, Gyaku-zuki Chudan',
-      'Avanza en Zenkutsu-dachi Mae-geri Chudan Keage, Oi-zuki Chudan',
-      'Gira y avanza Mawashi-geri Chudan, Gyaku-zuki Chudan',
-      'Avanza en Zenkutsu-dachi Mae-geri Ren-geri Keage Chudan, Jodan',
-      'Gira y avanza en Zenkutsu-dachi Mawashi-geri Ren-geri Chudan, Jodan',
-      'Avanza en Kiba-dachi Yoko-geri Jodan Keage (izq. y der.)',
-      'Avanza en Kiba-dachi Yoko-geri Chudan Kekomi (izq. y der.)',
+      'Retrocede en Kōkutsu-dachi Shuto-uke → Zenkutsu-dachi Nukite',
+      'Avanza en Zenkutsu-dachi Uchi Ude-uke, Gyaku-zuki Chūdan',
+      'Retrocede en Zenkutsu-dachi Gedan-barai, Mae-geri Chūdan Keage, Gyaku-zuki Chūdan',
+      'Avanza en Zenkutsu-dachi Mae-geri Chūdan Keage, Oi-zuki Chūdan',
+      'Gira y avanza Mawashi-geri Chūdan, Gyaku-zuki Chūdan',
+      'Avanza en Zenkutsu-dachi Mae-geri Ren-geri Keage Chūdan, Jōdan',
+      'Gira y avanza en Zenkutsu-dachi Mawashi-geri Ren-geri Chūdan, Jōdan',
+      'Avanza en Kiba-dachi Yoko-geri Jōdan Keage (izq. y der.)',
+      'Avanza en Kiba-dachi Yoko-geri Chūdan Kekomi (izq. y der.)',
     ],
   },
   '5kyu': {
     kata: ['Heian Sandan'],
     kumite: [
-      'Gohon Kumite Ichi, Ni, San',
+      'Gohon Kumite (Jōdan, Chūdan, Mae-geri)',
       'Sanbon Kumite Ichi, Ni, San',
     ],
     kihon: [
-      'Avanza en Zenkutsu-dachi Oi-zuki Sanbon-zuki Jodan, Chudan, Chudan',
-      'Retrocede en Zenkutsu-dachi Age-uke, Mae-geri Chudan Keage, Gyaku-zuki Chudan',
+      'Avanza en Zenkutsu-dachi Oi-zuki Sanbon-zuki Jōdan, Chūdan, Chūdan',
+      'Retrocede en Zenkutsu-dachi Age-uke, Mae-geri Chūdan Keage, Gyaku-zuki Chūdan',
       'Avanza en Zenkutsu-dachi Soto Ude-uke → Kiba-dachi Empi-uchi',
-      'Retrocede en Kokutsu-dachi Shuto-uke → Kizami Mae-geri Chudan Keage, Nukite',
-      'Avanza en Zenkutsu-dachi Uchi Ude-uke, Gyaku-zuki Chudan',
-      'Retrocede en Zenkutsu-dachi Gedan-barai, Mae-geri Chudan Keage, Gyaku-zuki Chudan',
-      'Avanza en Zenkutsu-dachi Mae-geri Chudan Keage, Oi-zuki Chudan',
-      'Gira y avanza Mawashi-geri Jodan, Gyaku-zuki Chudan',
-      'Avanza en Zenkutsu-dachi Mae-geri Ren-geri Keage Chudan, Jodan',
-      'Gira y avanza Mawashi-geri Ren-geri Chudan, Jodan',
-      'Avanza en Kiba-dachi Yoko-geri Jodan Keage (izq. y der.)',
-      'Avanza en Kiba-dachi Yoko-geri Chudan Kekomi (izq. y der.)',
+      'Retrocede en Kōkutsu-dachi Shuto-uke → Kizami Mae-geri Chūdan Keage, Nukite',
+      'Avanza en Zenkutsu-dachi Uchi Ude-uke, Gyaku-zuki Chūdan',
+      'Retrocede en Zenkutsu-dachi Gedan-barai, Mae-geri Chūdan Keage, Gyaku-zuki Chūdan',
+      'Avanza en Zenkutsu-dachi Mae-geri Chūdan Keage, Oi-zuki Chūdan',
+      'Gira y avanza Mawashi-geri Jōdan, Gyaku-zuki Chūdan',
+      'Avanza en Zenkutsu-dachi Mae-geri Ren-geri Keage Chūdan, Jōdan',
+      'Gira y avanza Mawashi-geri Ren-geri Chūdan, Jōdan',
+      'Avanza en Kiba-dachi Yoko-geri Jōdan Keage (izq. y der.)',
+      'Avanza en Kiba-dachi Yoko-geri Chūdan Kekomi (izq. y der.)',
     ],
   },
   '4kyu': {
     kata: ['Heian Yondan'],
     kumite: [
-      'Gohon Kumite Ichi, Ni, San',
+      'Gohon Kumite (Jōdan, Chūdan, Mae-geri)',
       'Sanbon Kumite Ichi, Ni, San, Shi',
     ],
     kihon: [
-      'Avanza en Zenkutsu-dachi Oi-zuki Sanbon-zuki Jodan, Chudan, Chudan',
-      'Retrocede en Zenkutsu-dachi Age-uke, Mae-geri Chudan, Gyaku-zuki Chudan',
+      'Avanza en Zenkutsu-dachi Oi-zuki Sanbon-zuki Jōdan, Chūdan, Chūdan',
+      'Retrocede en Zenkutsu-dachi Age-uke, Mae-geri Chūdan, Gyaku-zuki Chūdan',
       'Avanza Soto Ude-uke → Kiba-dachi Empi-uchi, Uraken-uchi',
-      'Retrocede Kokutsu-dachi Shuto-uke → Kizami Mae-geri Chudan Keage, Nukite',
-      'Avanza Uchi Ude-uke, Kizami Mae-geri Chudan Keage, Gyaku-zuki Chudan',
-      'Retrocede Gedan-barai, Mae-geri Chudan Keage, Gyaku-zuki Chudan',
-      'Avanza Mae-geri Chudan Keage, Oi-zuki Chudan',
-      'Gira y avanza Mawashi-geri Jodan, Gyaku-zuki Chudan',
-      'Avanza Mae-geri Ren-geri Keage Chudan, Jodan',
-      'Gira y avanza Mawashi-geri Ren-geri Chudan, Jodan',
-      'Avanza en Kiba-dachi Yoko-geri Jodan Keage (izq. y der.)',
-      'Avanza en Kiba-dachi Yoko-geri Chudan Kekomi (izq. y der.)',
+      'Retrocede Kōkutsu-dachi Shuto-uke → Kizami Mae-geri Chūdan Keage, Nukite',
+      'Avanza Uchi Ude-uke, Kizami Mae-geri Chūdan Keage, Gyaku-zuki Chūdan',
+      'Retrocede Gedan-barai, Mae-geri Chūdan Keage, Gyaku-zuki Chūdan',
+      'Avanza Mae-geri Chūdan Keage, Oi-zuki Chūdan',
+      'Gira y avanza Mawashi-geri Jōdan, Gyaku-zuki Chūdan',
+      'Avanza Mae-geri Ren-geri Keage Chūdan, Jōdan',
+      'Gira y avanza Mawashi-geri Ren-geri Chūdan, Jōdan',
+      'Avanza en Kiba-dachi Yoko-geri Jōdan Keage (izq. y der.)',
+      'Avanza en Kiba-dachi Yoko-geri Chūdan Kekomi (izq. y der.)',
     ],
   },
   '3kyu': {
     kata: ['Heian Godan', 'Tekki Shodan'],
     kumite: [
-      'Gohon Kumite Ichi, Ni, San',
+      'Gohon Kumite (Jōdan, Chūdan, Mae-geri)',
       'Sanbon Kumite Ichi, Ni, San, Shi, Go',
     ],
     kihon: [
-      'Avanza Oi-zuki Sanbon-zuki Jodan, Chudan, Chudan',
-      'Retrocede Age-uke, Mae-geri Chudan Keage, Gyaku-zuki Chudan',
-      'Avanza Soto Ude-uke → Kiba-dachi Empi-uchi, Uraken-uchi → Zenkutsu-dachi Gyaku-zuki Chudan',
-      'Retrocede Kokutsu-dachi Shuto-uke → Kizami Mae-geri Chudan Keage, Nukite',
-      'Avanza Uchi Ude-uke, Kizami Mae-geri Chudan Keage, Gyaku-zuki Chudan',
-      'Retrocede Gedan-barai, Mae-geri Chudan Keage, Gyaku-zuki Chudan',
+      'Avanza Oi-zuki Sanbon-zuki Jōdan, Chūdan, Chūdan',
+      'Retrocede Age-uke, Mae-geri Chūdan Keage, Gyaku-zuki Chūdan',
+      'Avanza Soto Ude-uke → Kiba-dachi Empi-uchi, Uraken-uchi → Zenkutsu-dachi Gyaku-zuki Chūdan',
+      'Retrocede Kōkutsu-dachi Shuto-uke → Kizami Mae-geri Chūdan Keage, Nukite',
+      'Avanza Uchi Ude-uke, Kizami Mae-geri Chūdan Keage, Gyaku-zuki Chūdan',
+      'Retrocede Gedan-barai, Mae-geri Chūdan Keage, Gyaku-zuki Chūdan',
       'Avanza Haito-uchi',
       'Retrocede Shuto-uchi',
-      'Avanza Mae-geri Ren-geri Keage Chudan, Jodan',
-      'Gira y avanza Kizami Mae-geri Chudan Keage, Mae-geri Jodan Keage',
-      'Avanza Mawashi-geri Ren-geri Chudan, Jodan',
-      'Gira y avanza Kizami Mawashi-geri Chudan, Mawashi-geri Jodan',
-      'Avanza en Kiba-dachi Yoko-geri Jodan Keage (izq. y der.)',
-      'Avanza en Kiba-dachi Yoko-geri Chudan Kekomi (izq. y der.)',
-      'Avanza Yoko-geri Chudan Kekomi + Mawashi-geri Jodan pierna contraria, Gyaku-zuki',
-      'Gira y avanza Mawashi-geri Jodan + Yoko-geri Chudan Kekomi pierna contraria, Gyaku-zuki',
-      'Avanza Ushiro-geri Chudan',
-      'Desde Zenkutsu-dachi: Mae-geri Jodan + Yoko-geri Jodan (sin apoyar)',
+      'Avanza Mae-geri Ren-geri Keage Chūdan, Jōdan',
+      'Gira y avanza Kizami Mae-geri Chūdan Keage, Mae-geri Jōdan Keage',
+      'Avanza Mawashi-geri Ren-geri Chūdan, Jōdan',
+      'Gira y avanza Kizami Mawashi-geri Chūdan, Mawashi-geri Jōdan',
+      'Avanza en Kiba-dachi Yoko-geri Jōdan Keage (izq. y der.)',
+      'Avanza en Kiba-dachi Yoko-geri Chūdan Kekomi (izq. y der.)',
+      'Avanza Yoko-geri Chūdan Kekomi + Mawashi-geri Jōdan pierna contraria, Gyaku-zuki',
+      'Gira y avanza Mawashi-geri Jōdan + Yoko-geri Chūdan Kekomi pierna contraria, Gyaku-zuki',
+      'Avanza Ushiro-geri Chūdan',
+      'Desde Zenkutsu-dachi: Mae-geri Jōdan + Yoko-geri Jōdan (sin apoyar)',
       'Shi-hon-zuki: Gyaku-zuki 4x2 girando 360° (3 series por lado)',
     ],
   },
   '2kyu': {
     kata: ['Bassai Dai'],
     kumite: [
-      'Gohon Kumite Ichi, Ni, San',
+      'Gohon Kumite (Jōdan, Chūdan, Mae-geri)',
       'Sanbon Kumite Ichi, Ni, San, Shi, Go',
       'Ippon Kumite',
     ],
     kihon: [
-      'Avanza Oi-zuki Sanbon-zuki Jodan, Chudan, Chudan',
-      'Retrocede Age-uke, Kizami Mae-geri Chudan Keage, Gyaku-zuki Chudan',
-      'Avanza Soto Ude-uke → Kiba-dachi Empi-uchi, Uraken-uchi → Gyaku-zuki Chudan',
-      'Retrocede Kokutsu-dachi Shuto-uke → Kizami Mae-geri Chudan Keage, Nukite',
-      'Avanza Uchi Ude-uke, Kizami Mawashi-geri Chudan, Gyaku-zuki Chudan',
-      'Retrocede Gedan-barai, Mae-geri Chudan Keage, Gyaku-zuki Chudan',
+      'Avanza Oi-zuki Sanbon-zuki Jōdan, Chūdan, Chūdan',
+      'Retrocede Age-uke, Kizami Mae-geri Chūdan Keage, Gyaku-zuki Chūdan',
+      'Avanza Soto Ude-uke → Kiba-dachi Empi-uchi, Uraken-uchi → Gyaku-zuki Chūdan',
+      'Retrocede Kōkutsu-dachi Shuto-uke → Kizami Mae-geri Chūdan Keage, Nukite',
+      'Avanza Uchi Ude-uke, Kizami Mawashi-geri Chūdan, Gyaku-zuki Chūdan',
+      'Retrocede Gedan-barai, Mae-geri Chūdan Keage, Gyaku-zuki Chūdan',
       'Avanza Haito-uchi, Gyaku Haito-uchi',
       'Retrocede Shuto-uchi, Gyaku Shuto-uchi',
-      'Avanza Mae-geri Ren-geri Keage Chudan, Jodan',
-      'Gira y avanza Kizami Mae-geri Chudan Keage, Mae-geri Jodan Keage',
-      'Avanza Mawashi-geri Ren-geri Chudan, Jodan',
-      'Gira y avanza Kizami Mawashi-geri Chudan, Mawashi-geri Jodan',
-      'Avanza en Kiba-dachi Yoko-geri Jodan Keage (izq. y der.)',
-      'Avanza en Kiba-dachi Yoko-geri Chudan Kekomi (izq. y der.)',
-      'Avanza Yoko-geri Chudan Kekomi + Mawashi-geri Jodan pierna contraria, Gyaku-zuki',
-      'Gira y avanza Mawashi-geri Jodan + Yoko-geri Chudan Kekomi pierna contraria, Gyaku-zuki',
-      'Avanza Ushiro-geri Chudan',
-      'Desde Zenkutsu-dachi: Mae-geri Jodan + Yoko-geri Jodan (sin apoyar)',
+      'Avanza Mae-geri Ren-geri Keage Chūdan, Jōdan',
+      'Gira y avanza Kizami Mae-geri Chūdan Keage, Mae-geri Jōdan Keage',
+      'Avanza Mawashi-geri Ren-geri Chūdan, Jōdan',
+      'Gira y avanza Kizami Mawashi-geri Chūdan, Mawashi-geri Jōdan',
+      'Avanza en Kiba-dachi Yoko-geri Jōdan Keage (izq. y der.)',
+      'Avanza en Kiba-dachi Yoko-geri Chūdan Kekomi (izq. y der.)',
+      'Avanza Yoko-geri Chūdan Kekomi + Mawashi-geri Jōdan pierna contraria, Gyaku-zuki',
+      'Gira y avanza Mawashi-geri Jōdan + Yoko-geri Chūdan Kekomi pierna contraria, Gyaku-zuki',
+      'Avanza Ushiro-geri Chūdan',
+      'Desde Zenkutsu-dachi: Mae-geri Jōdan + Yoko-geri Jōdan (sin apoyar)',
       'Shi-hon-zuki: Gyaku-zuki 4x2 girando 360° (3 series por lado)',
     ],
   },
   '1kyu': {
-    kata: ['Bassai Dai', 'Jion', 'Enpi', 'Kanku Dai'],
+    kata: ['Bassai Dai', 'Jion', 'Enpi', 'Kankū Dai'],
     kumite: [
-      'Gohon Kumite Ichi, Ni, San',
+      'Gohon Kumite (Jōdan, Chūdan, Mae-geri)',
       'Sanbon Kumite Ichi, Ni, San, Shi, Go',
       'Ippon Kumite',
       'Jiyu Kumite',
     ],
     kihon: [
-      'Avanza Oi-zuki Sanbon-zuki Jodan, Chudan, Chudan',
-      'Retrocede Age-uke, Kizami Mae-geri Chudan Keage, Gyaku-zuki Chudan',
-      'Avanza Soto Ude-uke → Kiba-dachi Empi-uchi, Uraken-uchi → Gyaku-zuki Chudan',
-      'Retrocede Kokutsu-dachi Shuto-uke → Kizami Mae-geri Chudan Keage, Nukite',
-      'Avanza Uchi Ude-uke, Kizami Mawashi-geri Chudan, Gyaku-zuki Chudan',
-      'Retrocede Gedan-barai, Mae-geri Chudan Keage, Gyaku-zuki Chudan',
+      'Avanza Oi-zuki Sanbon-zuki Jōdan, Chūdan, Chūdan',
+      'Retrocede Age-uke, Kizami Mae-geri Chūdan Keage, Gyaku-zuki Chūdan',
+      'Avanza Soto Ude-uke → Kiba-dachi Empi-uchi, Uraken-uchi → Gyaku-zuki Chūdan',
+      'Retrocede Kōkutsu-dachi Shuto-uke → Kizami Mae-geri Chūdan Keage, Nukite',
+      'Avanza Uchi Ude-uke, Kizami Mawashi-geri Chūdan, Gyaku-zuki Chūdan',
+      'Retrocede Gedan-barai, Mae-geri Chūdan Keage, Gyaku-zuki Chūdan',
       'Avanza Haito-uchi, Gyaku Haito-uchi',
       'Retrocede Shuto-uchi, Gyaku Haito-uchi',
-      'Avanza Kizami Mae-geri Chudan Keage, Mae-geri Ren-geri Keage Chudan, Jodan',
-      'Gira y avanza Kizami Mae-geri Chudan Keage, Mae-geri Jodan Keage',
-      'Avanza Mawashi-geri Ren-geri Chudan, Jodan',
-      'Gira y avanza Kizami Mawashi-geri Chudan, Mawashi-geri Jodan',
-      'Avanza en Kiba-dachi Yoko-geri Jodan Keage (izq. y der.)',
-      'Avanza en Kiba-dachi Yoko-geri Chudan Kekomi (izq. y der.)',
-      'Avanza Yoko-geri Jodan Keage + Mawashi-geri Jodan pierna contraria, Gyaku-zuki',
-      'Gira y avanza Mawashi-geri Jodan + Yoko-geri Chudan Kekomi pierna contraria, Gyaku-zuki',
-      'Avanza Ushiro-geri Chudan, Gyaku-zuki Chudan',
-      'Desde Zenkutsu-dachi: Mae-geri Jodan + Yoko-geri Jodan + Yoko-geri Kekomi (sin apoyar)',
+      'Avanza Kizami Mae-geri Chūdan Keage, Mae-geri Ren-geri Keage Chūdan, Jōdan',
+      'Gira y avanza Kizami Mae-geri Chūdan Keage, Mae-geri Jōdan Keage',
+      'Avanza Mawashi-geri Ren-geri Chūdan, Jōdan',
+      'Gira y avanza Kizami Mawashi-geri Chūdan, Mawashi-geri Jōdan',
+      'Avanza en Kiba-dachi Yoko-geri Jōdan Keage (izq. y der.)',
+      'Avanza en Kiba-dachi Yoko-geri Chūdan Kekomi (izq. y der.)',
+      'Avanza Yoko-geri Jōdan Keage + Mawashi-geri Jōdan pierna contraria, Gyaku-zuki',
+      'Gira y avanza Mawashi-geri Jōdan + Yoko-geri Chūdan Kekomi pierna contraria, Gyaku-zuki',
+      'Avanza Ushiro-geri Chūdan, Gyaku-zuki Chūdan',
+      'Desde Zenkutsu-dachi: Mae-geri Jōdan + Yoko-geri Jōdan + Yoko-geri Kekomi (sin apoyar)',
       'Shi-hon-zuki: Gyaku-zuki 4x2 girando 360° (3 series por lado)',
     ],
   },
 };
 
-const PINTA_HEREDA_DE = {
-  'pinta_7kyu': '8kyu',
-  'pinta_6kyu': '7kyu',
-  'pinta_5kyu': '6kyu',
-  'pinta_4kyu': '5kyu',
-  'pinta_3kyu': '4kyu',
+const SIGUIENTE_COLOR = {
+  '8kyu': '7kyu',
+  'pinta_7kyu': '7kyu',
+  '7kyu': '6kyu',
+  'pinta_6kyu': '6kyu',
+  '6kyu': '5kyu',
+  'pinta_5kyu': '5kyu',
+  '5kyu': '4kyu',
+  'pinta_4kyu': '4kyu',
+  '4kyu': '3kyu',
+  'pinta_3kyu': '3kyu',
+  '3kyu': '2kyu',
+  '2kyu': '1kyu',
+  '1kyu': '1dan',
 };
-
-function resolveContentKey(kyuActual) {
-  if (PINTA_HEREDA_DE[kyuActual]) return PINTA_HEREDA_DE[kyuActual];
-  return kyuActual;
-}
-
-function nextGrado(kyu) {
-  const i = GRADO_ORDER.indexOf(kyu);
-  if (i < 0 || i >= GRADO_ORDER.length - 1) return null;
-  return GRADO_ORDER[i + 1];
-}
 
 const checkboxStyle = {
   width: '1rem',
@@ -251,13 +246,8 @@ export default function KaratecaTecnicoPage() {
   const kyuActual = data?.karateca?.kyuActual ?? '8kyu';
   const preExamen = Boolean(data?.karateca?.preExamenAprobado);
 
-  const contentKey = resolveContentKey(kyuActual);
-  const tech = KYU_TECNICO[contentKey];
-  const siguiente = nextGrado(kyuActual);
-
-  const notaPinta = PINTA_HEREDA_DE[kyuActual]
-    ? 'Estás en pinta: aquí ves el programa técnico que corresponde preparar para tu próximo ascenso.'
-    : null;
+  const siguienteColor = SIGUIENTE_COLOR[kyuActual];
+  const tech = KYU_TECNICO[SIGUIENTE_COLOR[kyuActual]] ?? null;
 
   if (loading) {
     return (
@@ -276,25 +266,27 @@ export default function KaratecaTecnicoPage() {
   }
 
   return (
-    <div style={{ minHeight: '100%', background: DOJO.negro, color: '#eee', padding: '1.5rem', maxWidth: '42rem' }}>
-      <h1 style={{ margin: '0 0 1.25rem', fontSize: '1.35rem', color: DOJO.dorado }}>Contenido técnico</h1>
+    <div
+      className="mx-auto w-full max-w-[42rem] p-3 md:p-6 lg:p-8"
+      style={{ minHeight: '100%', background: DOJO.negro, color: '#eee' }}
+    >
+      <h1 className="mb-4 text-lg font-semibold md:text-xl lg:text-2xl" style={{ color: DOJO.dorado }}>
+        Contenido técnico
+      </h1>
 
       {/* Sección 1 — Header */}
       <section
-        style={{
-          marginBottom: '1.5rem',
-          paddingBottom: '1.25rem',
-          borderBottom: `2px solid ${DOJO.dorado}`,
-        }}
+        className="mb-6 flex flex-col gap-3 border-b pb-5 md:mb-8"
+        style={{ borderColor: DOJO.dorado }}
       >
-        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.65rem', marginBottom: '0.75rem' }}>
+        <div className="flex flex-wrap items-center gap-2 md:gap-3">
           <KyuBadge kyu={kyuActual} />
-          {siguiente && (
+          {siguienteColor && (
             <>
               <span style={{ color: DOJO.dorado, fontSize: '1.25rem', fontWeight: 700 }} aria-hidden>
                 →
               </span>
-              <KyuBadge kyu={siguiente} />
+              <KyuBadge kyu={siguienteColor} />
             </>
           )}
         </div>
@@ -314,11 +306,6 @@ export default function KaratecaTecnicoPage() {
             ⭐ Autorizado para examen
           </div>
         )}
-        {notaPinta && (
-          <p style={{ margin: '0.85rem 0 0', fontSize: '0.9rem', color: '#bbb', lineHeight: 1.45 }}>
-            {notaPinta}
-          </p>
-        )}
       </section>
 
       {!tech ? (
@@ -328,8 +315,8 @@ export default function KaratecaTecnicoPage() {
       ) : (
         <>
           {/* Sección 2 — Kata */}
-          <section style={{ marginBottom: '1.5rem' }}>
-            <h2 style={{ margin: '0 0 0.75rem', fontSize: '1.05rem', color: DOJO.dorado, fontWeight: 700 }}>
+          <section className="mb-6 md:mb-8">
+            <h2 className="mb-3 text-base font-bold md:text-lg" style={{ color: DOJO.dorado }}>
               Kata para el ascenso
             </h2>
             <ul style={{ margin: 0, paddingLeft: '1.1rem', color: '#e8e8e8', lineHeight: 1.65 }}>
@@ -345,8 +332,8 @@ export default function KaratecaTecnicoPage() {
           </section>
 
           {/* Sección 3 — Kumite */}
-          <section style={{ marginBottom: '1.5rem' }}>
-            <h2 style={{ margin: '0 0 0.75rem', fontSize: '1.05rem', color: DOJO.dorado, fontWeight: 700 }}>
+          <section className="mb-6 md:mb-8">
+            <h2 className="mb-3 text-base font-bold md:text-lg" style={{ color: DOJO.dorado }}>
               Kumite requerido
             </h2>
             <ul style={{ margin: 0, paddingLeft: '1.1rem', color: '#e8e8e8', lineHeight: 1.65 }}>
@@ -362,11 +349,12 @@ export default function KaratecaTecnicoPage() {
           </section>
 
           {/* Sección 4 — Kihon */}
-          <section>
-            <h2 style={{ margin: '0 0 0.75rem', fontSize: '1.05rem', color: DOJO.dorado, fontWeight: 700 }}>
+          <section className="flex min-h-0 flex-col">
+            <h2 className="mb-3 text-base font-bold md:text-lg" style={{ color: DOJO.dorado }}>
               Kihon a preparar
             </h2>
             <ol
+              className="max-h-[min(70vh,28rem)] overflow-y-auto pr-1 md:max-h-none md:overflow-visible"
               style={{
                 margin: 0,
                 paddingLeft: '1.35rem',

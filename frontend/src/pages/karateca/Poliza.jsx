@@ -87,14 +87,19 @@ export default function KaratecaPolizaPage() {
   }
 
   return (
-    <div style={{ minHeight: '100%', background: DOJO.negro, color: '#eee', padding: '1.5rem', maxWidth: '40rem' }}>
-      <h1 style={{ margin: '0 0 1.25rem', fontSize: '1.4rem', color: DOJO.dorado }}>Mi póliza</h1>
+    <div
+      className="mx-auto w-full max-w-[40rem] p-3 md:p-6 lg:p-8"
+      style={{ minHeight: '100%', background: DOJO.negro, color: '#eee' }}
+    >
+      <h1 className="mb-4 text-lg font-semibold md:text-xl lg:text-2xl" style={{ color: DOJO.dorado }}>
+        Mi póliza
+      </h1>
 
       {error && (
         <div style={{ color: '#f88', marginBottom: '1rem', fontSize: '0.9rem' }}>{error}</div>
       )}
 
-      <section style={{ marginBottom: '1.75rem' }}>
+      <section className="mb-6 flex flex-col gap-4 md:mb-8">
         {!vigente ? (
           <div
             style={{
@@ -111,20 +116,27 @@ export default function KaratecaPolizaPage() {
             Sin póliza registrada — Contacta al Sensei
           </div>
         ) : (
-          <div>
-            <div style={{ fontSize: '1.65rem', fontWeight: 800, color: '#fff', marginBottom: '0.65rem', lineHeight: 1.2 }}>
+          <div className="flex flex-col gap-3">
+            <div className="text-xl font-extrabold leading-tight text-white md:text-2xl lg:text-[1.65rem]">
               {vigente.aseguradora}
             </div>
-            <p style={{ margin: '0 0 0.35rem', fontSize: '0.95rem', color: '#ccc' }}>
+            <p className="text-sm text-[#ccc] md:text-base">
               <span style={{ color: '#888' }}>N° Póliza: </span>
               <span style={{ fontWeight: 700, color: '#eee' }}>{vigente.numeroPoliza}</span>
             </p>
-            <p style={{ margin: '0 0 1rem', fontSize: '0.92rem', color: '#bbb' }}>
-              Inicio: <strong style={{ color: '#ddd', fontWeight: 600 }}>{formatFecha(vigente.fechaInicio)}</strong>
-              {' · '}
-              Vencimiento:{' '}
-              <strong style={{ color: '#ddd', fontWeight: 600 }}>{formatFecha(vigente.fechaVencimiento)}</strong>
-            </p>
+            <div className="flex flex-col gap-1 text-sm text-[#bbb] md:flex-row md:flex-wrap md:gap-2 md:text-base">
+              <p className="m-0">
+                Inicio:{' '}
+                <strong style={{ color: '#ddd', fontWeight: 600 }}>{formatFecha(vigente.fechaInicio)}</strong>
+              </p>
+              <span className="hidden md:inline" aria-hidden>
+                ·
+              </span>
+              <p className="m-0">
+                Vencimiento:{' '}
+                <strong style={{ color: '#ddd', fontWeight: 600 }}>{formatFecha(vigente.fechaVencimiento)}</strong>
+              </p>
+            </div>
 
             {(() => {
               const est = vigente.estado;
@@ -212,11 +224,25 @@ export default function KaratecaPolizaPage() {
       </section>
 
       {historialRows.length > 0 && (
-        <section>
-          <h2 style={{ margin: '0 0 0.85rem', fontSize: '1.05rem', color: DOJO.dorado, fontWeight: 700 }}>
+        <section className="flex flex-col gap-4">
+          <h2 className="text-base font-bold md:text-lg" style={{ color: DOJO.dorado }}>
             Historial de pólizas anteriores
           </h2>
-          <div style={{ overflowX: 'auto' }}>
+          <div className="space-y-3 lg:hidden">
+            {historialRows.map((row) => (
+              <div
+                key={row.id}
+                className="rounded-lg border border-[#333] bg-[#141414] p-4 text-sm"
+              >
+                <p className="mb-1 font-semibold text-white">{row.aseguradora}</p>
+                <p className="mb-2 text-[#ccc]">N° {row.numeroPoliza}</p>
+                <p className="mb-1 text-xs text-[#aaa]">Inicio: {formatFecha(row.fechaInicio)}</p>
+                <p className="mb-2 text-xs text-[#aaa]">Vencimiento: {formatFecha(row.fechaVencimiento)}</p>
+                <p className="text-[#ddd]">{labelEstadoTabla(row.estado)}</p>
+              </div>
+            ))}
+          </div>
+          <div className="hidden overflow-x-auto lg:block">
             <table
               style={{
                 width: '100%',

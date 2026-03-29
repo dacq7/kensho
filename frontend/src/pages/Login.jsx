@@ -7,7 +7,10 @@ import api from '../lib/api';
 import useAuthStore from '../store/authStore';
 
 const loginSchema = z.object({
-  email: z.string().email('Introduce un email válido'),
+  numeroDocumento: z
+    .string()
+    .min(1, 'El número de documento es obligatorio')
+    .regex(/^\d+$/, 'Solo números'),
   password: z.string().min(1, 'La contraseña es obligatoria'),
 });
 
@@ -23,7 +26,7 @@ export default function Login() {
     formState: { errors, isSubmitting },
   } = useForm({
     resolver: zodResolver(loginSchema),
-    defaultValues: { email: '', password: '' },
+    defaultValues: { numeroDocumento: '', password: '' },
   });
 
   useEffect(() => {
@@ -38,7 +41,7 @@ export default function Login() {
   const onSubmit = async (values) => {
     try {
       const { data } = await api.post('/auth/login', {
-        email: values.email,
+        numeroDocumento: values.numeroDocumento.trim(),
         password: values.password,
       });
       login(data.user, data.token);
@@ -61,10 +64,10 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 bg-[#111111]">
-      <div className="w-full max-w-md rounded-lg border border-[#C9A84C]/40 bg-[#1a1a1a] shadow-xl p-8">
-        <div className="mb-8 text-center">
-          <h1 className="text-2xl font-semibold tracking-tight text-[#C9A84C]">
+    <div className="flex min-h-screen flex-col items-stretch justify-center bg-[#111111] px-4 py-6 md:items-center md:px-4 md:py-8">
+      <div className="w-full rounded-lg border border-[#C9A84C]/40 bg-[#1a1a1a] p-4 shadow-xl md:mx-auto md:max-w-md md:p-8">
+        <div className="mb-6 text-center md:mb-8">
+          <h1 className="text-lg font-semibold tracking-tight text-[#C9A84C] md:text-2xl">
             Budokan
           </h1>
           <p className="mt-1 text-sm text-white/70">Acceso al dojo</p>
@@ -73,21 +76,22 @@ export default function Login() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           <div>
             <label
-              htmlFor="email"
+              htmlFor="numeroDocumento"
               className="block text-sm font-medium text-white/90 mb-1.5"
             >
-              Email
+              Número de documento
             </label>
             <input
-              id="email"
-              type="email"
-              autoComplete="email"
+              id="numeroDocumento"
+              type="text"
+              inputMode="numeric"
+              autoComplete="username"
               className="w-full rounded-md border border-white/15 bg-[#111111] px-3 py-2.5 text-white placeholder:text-white/35 focus:border-[#C9A84C] focus:outline-none focus:ring-1 focus:ring-[#C9A84C]"
-              placeholder="tu@email.com"
-              {...register('email')}
+              placeholder="Solo números"
+              {...register('numeroDocumento')}
             />
-            {errors.email && (
-              <p className="mt-1 text-sm text-[#CC0000]">{errors.email.message}</p>
+            {errors.numeroDocumento && (
+              <p className="mt-1 text-sm text-[#CC0000]">{errors.numeroDocumento.message}</p>
             )}
           </div>
 
@@ -120,7 +124,7 @@ export default function Login() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full rounded-md bg-[#CC0000] py-2.5 text-sm font-semibold text-white transition hover:bg-[#b30000] disabled:opacity-60 border border-[#C9A84C]/30"
+            className="min-h-[44px] w-full rounded-md border border-[#C9A84C]/30 bg-[#CC0000] py-2.5 text-sm font-semibold text-white transition hover:bg-[#b30000] disabled:opacity-60 md:w-auto md:px-8"
           >
             {isSubmitting ? 'Entrando…' : 'Entrar'}
           </button>

@@ -180,34 +180,17 @@ export default function SenseiInventarioPage() {
   };
 
   return (
-    <div style={{ minHeight: '100%', background: DOJO.negro, color: '#eee', padding: '1.5rem' }}>
-      <header
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: '0.75rem',
-          borderBottom: `2px solid ${DOJO.dorado}`,
-          paddingBottom: '0.85rem',
-          marginBottom: '1.25rem',
-        }}
-      >
-        <h1 style={{ margin: 0, color: DOJO.dorado, fontSize: '1.5rem' }}>Inventario del Dojo</h1>
+    <div className="p-3 text-[#eee] md:p-6 lg:p-8" style={{ minHeight: '100%', background: DOJO.negro }}>
+      <header className="mb-4 flex flex-col gap-3 border-b pb-3 sm:flex-row sm:items-center sm:justify-between md:mb-5 md:pb-4" style={{ borderColor: DOJO.dorado }}>
+        <h1 className="text-lg font-semibold md:text-xl lg:text-2xl" style={{ margin: 0, color: DOJO.dorado }}>
+          Inventario del Dojo
+        </h1>
         <button
           type="button"
           onClick={openCreate}
+          className="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-lg border-0 font-bold text-white sm:w-auto sm:px-4"
           style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.4rem',
-            border: 'none',
-            borderRadius: 8,
             background: DOJO.rojo,
-            color: '#fff',
-            fontWeight: 700,
-            padding: '0.45rem 0.9rem',
-            cursor: 'pointer',
             fontSize: '0.9rem',
           }}
         >
@@ -246,18 +229,57 @@ export default function SenseiInventarioPage() {
       )}
 
       <section
+        className="mb-4 md:mb-5"
         style={{
           background: '#1a1a1a',
           border: `1px solid ${DOJO.dorado}`,
           borderRadius: 8,
           padding: '1rem',
-          marginBottom: '1rem',
         }}
       >
         {loading ? (
           <p style={{ color: '#888', margin: 0 }}>Cargando…</p>
         ) : (
-          <div style={{ overflowX: 'auto' }}>
+          <>
+            <div className="space-y-3 lg:hidden">
+              {items.map((row) => (
+                <div
+                  key={row.id}
+                  className="rounded-lg border border-[#333] bg-[#141414] p-4"
+                >
+                  <p className="mb-2 font-semibold text-white">{row.nombre}</p>
+                  <div className="mb-2">{badgeCat(row.categoria)}</div>
+                  <p className="mb-2 text-sm text-[#ccc]">Cantidad: {row.cantidad}</p>
+                  <div className="mb-2">{badgeEst(row.estado)}</div>
+                  <p className="mb-3 text-xs text-[#aaa]">{row.notas || '—'}</p>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => openEdit(row)}
+                      title="Editar"
+                      className="inline-flex min-h-[44px] min-w-[44px] flex-1 items-center justify-center rounded-md border border-[#555] bg-[#262626] text-[#ddd]"
+                    >
+                      <Pencil size={15} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => eliminar(row)}
+                      disabled={deletingId === row.id}
+                      title="Eliminar"
+                      className="inline-flex min-h-[44px] min-w-[44px] flex-1 items-center justify-center rounded-md border border-[#8a1f1f] text-[#ffb0b0]"
+                      style={{
+                        background: 'rgba(204,0,0,0.25)',
+                        cursor: deletingId === row.id ? 'not-allowed' : 'pointer',
+                        opacity: deletingId === row.id ? 0.6 : 1,
+                      }}
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="hidden overflow-x-auto lg:block">
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.88rem' }}>
               <thead>
                 <tr style={{ borderBottom: `2px solid ${DOJO.dorado}`, color: DOJO.dorado, textAlign: 'left' }}>
@@ -285,14 +307,7 @@ export default function SenseiInventarioPage() {
                           type="button"
                           onClick={() => openEdit(row)}
                           title="Editar"
-                          style={{
-                            border: '1px solid #555',
-                            borderRadius: 6,
-                            background: '#262626',
-                            color: '#ddd',
-                            padding: '0.3rem 0.5rem',
-                            cursor: 'pointer',
-                          }}
+                          className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md border border-[#555] bg-[#262626] text-[#ddd]"
                         >
                           <Pencil size={15} />
                         </button>
@@ -301,12 +316,9 @@ export default function SenseiInventarioPage() {
                           onClick={() => eliminar(row)}
                           disabled={deletingId === row.id}
                           title="Eliminar"
+                          className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md border border-[#8a1f1f] text-[#ffb0b0]"
                           style={{
-                            border: '1px solid #8a1f1f',
-                            borderRadius: 6,
                             background: 'rgba(204,0,0,0.25)',
-                            color: '#ffb0b0',
-                            padding: '0.3rem 0.5rem',
                             cursor: deletingId === row.id ? 'not-allowed' : 'pointer',
                             opacity: deletingId === row.id ? 0.6 : 1,
                           }}
@@ -319,7 +331,8 @@ export default function SenseiInventarioPage() {
                 ))}
               </tbody>
             </table>
-          </div>
+            </div>
+          </>
         )}
       </section>
 
@@ -363,30 +376,15 @@ export default function SenseiInventarioPage() {
       {modalOpen && (
         <div
           role="presentation"
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0,0,0,0.75)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 50,
-            padding: '1rem',
-          }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-0 md:p-4"
           onClick={closeModal}
         >
           <div
             role="dialog"
             aria-labelledby="inv-modal-title"
             onClick={(e) => e.stopPropagation()}
-            style={{
-              width: '100%',
-              maxWidth: '26rem',
-              background: DOJO.negro,
-              border: `2px solid ${DOJO.dorado}`,
-              borderRadius: 10,
-              padding: '1.1rem',
-            }}
+            className="h-full max-h-[100dvh] w-full overflow-y-auto rounded-none border-0 p-4 md:h-auto md:max-h-[90vh] md:max-w-[26rem] md:rounded-[10px] md:border-2 md:p-[1.1rem]"
+            style={{ background: DOJO.negro, borderColor: DOJO.dorado }}
           >
             <h2 id="inv-modal-title" style={{ margin: '0 0 1rem', color: DOJO.dorado, fontSize: '1.1rem' }}>
               {editingId != null ? 'Editar ítem' : 'Agregar ítem'}
@@ -500,19 +498,13 @@ export default function SenseiInventarioPage() {
               />
             </label>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+            <div className="flex flex-col gap-2 sm:flex-row sm:justify-end sm:gap-2">
               <button
                 type="button"
                 onClick={closeModal}
                 disabled={saving}
-                style={{
-                  padding: '0.45rem 0.85rem',
-                  borderRadius: 6,
-                  border: '1px solid #555',
-                  background: 'transparent',
-                  color: '#ccc',
-                  cursor: saving ? 'not-allowed' : 'pointer',
-                }}
+                className="min-h-[44px] w-full rounded-md border border-[#555] bg-transparent px-4 text-[#ccc] sm:w-auto"
+                style={{ cursor: saving ? 'not-allowed' : 'pointer' }}
               >
                 Cancelar
               </button>
@@ -520,13 +512,9 @@ export default function SenseiInventarioPage() {
                 type="button"
                 onClick={guardar}
                 disabled={saving}
+                className="min-h-[44px] w-full rounded-md border-0 px-4 font-bold text-white sm:w-auto"
                 style={{
-                  padding: '0.45rem 0.85rem',
-                  borderRadius: 6,
-                  border: 'none',
                   background: DOJO.rojo,
-                  color: '#fff',
-                  fontWeight: 700,
                   cursor: saving ? 'not-allowed' : 'pointer',
                   opacity: saving ? 0.75 : 1,
                 }}

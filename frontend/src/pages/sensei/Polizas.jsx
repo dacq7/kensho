@@ -230,9 +230,11 @@ export default function SenseiPolizasPage() {
   const modalVisible = Boolean(createTarget || editTarget);
 
   return (
-    <div style={{ minHeight: '100%', background: DOJO.negro, color: '#eee', padding: '1.5rem' }}>
-      <header style={{ borderBottom: `2px solid ${DOJO.dorado}`, paddingBottom: '0.85rem', marginBottom: '1.25rem' }}>
-        <h1 style={{ margin: 0, color: DOJO.dorado, fontSize: '1.5rem' }}>Pólizas</h1>
+    <div className="p-3 text-[#eee] md:p-6 lg:p-8" style={{ minHeight: '100%', background: DOJO.negro }}>
+      <header className="mb-4 border-b pb-3 md:mb-5 md:pb-4" style={{ borderColor: DOJO.dorado }}>
+        <h1 className="text-lg font-semibold md:text-xl lg:text-2xl" style={{ margin: 0, color: DOJO.dorado }}>
+          Pólizas
+        </h1>
       </header>
 
       <section style={{ display: 'flex', flexWrap: 'wrap', gap: '0.9rem', marginBottom: '1.2rem' }}>
@@ -262,7 +264,67 @@ export default function SenseiPolizasPage() {
         {loading ? (
           <p style={{ color: '#888' }}>Cargando…</p>
         ) : (
-          <div style={{ overflowX: 'auto' }}>
+          <>
+            <div className="space-y-3 lg:hidden">
+              {filteredRows.map((row) => {
+                const b = badgeEstado(row.estado);
+                return (
+                  <div
+                    key={row.karatecaId}
+                    className="rounded-lg border border-[#C9A84C]/25 bg-[#141414] p-4"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => openHistory(row)}
+                      className="mb-2 min-h-[44px] w-full text-left font-bold"
+                      style={{ background: 'transparent', border: 'none', color: DOJO.dorado }}
+                    >
+                      {row.user?.nombre ?? `#${row.karatecaId}`}
+                    </button>
+                    <div className="mb-2">
+                      <KyuBadge kyu={gradoValue(row)} />
+                    </div>
+                    <p className="mb-1 text-sm text-[#ddd]">{row.poliza?.aseguradora || '—'}</p>
+                    <p className="mb-2 text-xs text-[#aaa]">
+                      {formatFecha(row.poliza?.fechaInicio)} → {formatFecha(row.poliza?.fechaVencimiento)}
+                    </p>
+                    <span
+                      className="mb-3 inline-block rounded-full px-2 py-0.5 text-xs font-semibold"
+                      style={{ background: b.bg, color: b.color }}
+                    >
+                      {b.label}
+                    </span>
+                    <div className="flex flex-col gap-2">
+                      <button
+                        type="button"
+                        onClick={() => openCreate(row)}
+                        className="min-h-[44px] w-full rounded-md border-0 font-semibold text-white"
+                        style={{ background: DOJO.rojo, fontSize: '0.85rem' }}
+                      >
+                        Registrar / Actualizar póliza
+                      </button>
+                      {row.poliza?.id && (
+                        <button
+                          type="button"
+                          onClick={() => removeByKarateca(row)}
+                          disabled={deletingId === `k-${row.karatecaId}`}
+                          className="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-md border border-[#8a1f1f] font-medium text-[#ffb0b0]"
+                          style={{
+                            background: 'rgba(204,0,0,0.25)',
+                            cursor: deletingId === `k-${row.karatecaId}` ? 'not-allowed' : 'pointer',
+                            opacity: deletingId === `k-${row.karatecaId}` ? 0.6 : 1,
+                          }}
+                        >
+                          <Trash2 size={16} />
+                          Quitar póliza
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="hidden overflow-x-auto lg:block">
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.88rem' }}>
               <thead>
                 <tr style={{ borderBottom: `2px solid ${DOJO.dorado}`, color: DOJO.dorado, textAlign: 'left' }}>
@@ -300,33 +362,49 @@ export default function SenseiPolizasPage() {
                 })}
               </tbody>
             </table>
-          </div>
+            </div>
+          </>
         )}
       </section>
 
       {modalVisible && (
-        <div role="presentation" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 60, padding: '1rem' }} onClick={closeModal}>
-          <div role="dialog" aria-labelledby="modal-poliza-title" onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: '26rem', background: DOJO.negro, border: `2px solid ${DOJO.dorado}`, borderRadius: 10, padding: '1.1rem' }}>
+        <div
+          role="presentation"
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 p-0 md:p-4"
+          onClick={closeModal}
+        >
+          <div
+            role="dialog"
+            aria-labelledby="modal-poliza-title"
+            onClick={(e) => e.stopPropagation()}
+            className="h-full max-h-[100dvh] w-full overflow-y-auto rounded-none border-0 p-4 md:h-auto md:max-h-[90vh] md:max-w-[26rem] md:rounded-[10px] md:border-2 md:p-[1.1rem]"
+            style={{ background: DOJO.negro, borderColor: DOJO.dorado }}
+          >
             <h3 id="modal-poliza-title" style={{ margin: '0 0 0.75rem', color: DOJO.dorado, fontSize: '1.05rem' }}>{editTarget ? 'Editar póliza' : 'Registrar nueva póliza'}</h3>
             <p style={{ margin: '0 0 1rem', color: '#aaa', fontSize: '0.85rem' }}>{editTarget ? 'Editando ítem del historial' : (createTarget?.user?.nombre ?? '')}</p>
             <label style={{ display: 'block', marginBottom: '0.7rem' }}><span style={{ display: 'block', fontSize: '0.8rem', color: '#bbb', marginBottom: '0.25rem' }}>Aseguradora</span><input type="text" value={aseguradora} onChange={(e) => setAseguradora(e.target.value)} style={{ width: '100%', boxSizing: 'border-box', padding: '0.45rem', borderRadius: 6, border: `1px solid ${DOJO.rojo}`, background: '#0f0f0f', color: '#fff' }} /></label>
             <label style={{ display: 'block', marginBottom: '0.7rem' }}><span style={{ display: 'block', fontSize: '0.8rem', color: '#bbb', marginBottom: '0.25rem' }}>Número de póliza</span><input type="text" value={numeroPoliza} onChange={(e) => setNumeroPoliza(e.target.value)} style={{ width: '100%', boxSizing: 'border-box', padding: '0.45rem', borderRadius: 6, border: `1px solid ${DOJO.rojo}`, background: '#0f0f0f', color: '#fff' }} /></label>
             <label style={{ display: 'block', marginBottom: '0.7rem' }}><span style={{ display: 'block', fontSize: '0.8rem', color: '#bbb', marginBottom: '0.25rem' }}>Fecha inicio</span><input type="date" value={fechaInicio} onChange={(e) => setFechaInicio(e.target.value)} style={{ width: '100%', boxSizing: 'border-box', padding: '0.45rem', borderRadius: 6, border: `1px solid ${DOJO.rojo}`, background: '#0f0f0f', color: '#fff' }} /></label>
             <label style={{ display: 'block', marginBottom: '1rem' }}><span style={{ display: 'block', fontSize: '0.8rem', color: '#bbb', marginBottom: '0.25rem' }}>Fecha vencimiento</span><input type="date" value={fechaVencimiento} onChange={(e) => setFechaVencimiento(e.target.value)} style={{ width: '100%', boxSizing: 'border-box', padding: '0.45rem', borderRadius: 6, border: `1px solid ${DOJO.rojo}`, background: '#0f0f0f', color: '#fff' }} /></label>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
-              <button type="button" onClick={closeModal} disabled={savingModal} style={{ padding: '0.45rem 0.85rem', borderRadius: 6, border: '1px solid #555', background: 'transparent', color: '#ccc', cursor: savingModal ? 'not-allowed' : 'pointer' }}>Cancelar</button>
-              <button type="button" onClick={saveForm} disabled={savingModal} style={{ padding: '0.45rem 0.85rem', borderRadius: 6, border: 'none', background: DOJO.rojo, color: '#fff', fontWeight: 700, cursor: savingModal ? 'not-allowed' : 'pointer', opacity: savingModal ? 0.7 : 1 }}>{savingModal ? 'Guardando…' : (editTarget ? 'Actualizar' : 'Guardar')}</button>
+            <div className="flex flex-col gap-2 sm:flex-row sm:justify-end sm:gap-2">
+              <button type="button" onClick={closeModal} disabled={savingModal} className="min-h-[44px] w-full rounded-md border border-[#555] bg-transparent px-4 text-[#ccc] sm:w-auto" style={{ cursor: savingModal ? 'not-allowed' : 'pointer' }}>Cancelar</button>
+              <button type="button" onClick={saveForm} disabled={savingModal} className="min-h-[44px] w-full rounded-md border-0 px-4 font-bold text-white sm:w-auto" style={{ background: DOJO.rojo, cursor: savingModal ? 'not-allowed' : 'pointer', opacity: savingModal ? 0.7 : 1 }}>{savingModal ? 'Guardando…' : (editTarget ? 'Actualizar' : 'Guardar')}</button>
             </div>
           </div>
         </div>
       )}
 
       {historyOpen && (
-        <div role="presentation" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 55 }} onClick={() => setHistoryOpen(false)}>
-          <aside role="dialog" onClick={(e) => e.stopPropagation()} style={{ position: 'absolute', right: 0, top: 0, width: 'min(680px, 100%)', height: '100%', background: '#171717', borderLeft: `2px solid ${DOJO.dorado}`, padding: '1rem', overflow: 'auto' }}>
+        <div role="presentation" className="fixed inset-0 z-[55] bg-black/60" onClick={() => setHistoryOpen(false)}>
+          <aside
+            role="dialog"
+            onClick={(e) => e.stopPropagation()}
+            className="absolute right-0 top-0 h-full w-full overflow-auto border-l-2 border-[#C9A84C] p-4 md:max-w-[680px]"
+            style={{ background: '#171717' }}
+          >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}>
               <h3 style={{ margin: 0, color: DOJO.dorado }}>Historial de pólizas — {historyKarateca?.user?.nombre}</h3>
-              <button type="button" onClick={() => setHistoryOpen(false)} style={{ border: '1px solid #555', background: 'transparent', color: '#ccc', borderRadius: 6, padding: '0.3rem 0.55rem', cursor: 'pointer' }}>Cerrar</button>
+              <button type="button" onClick={() => setHistoryOpen(false)} className="min-h-[44px] min-w-[44px] cursor-pointer rounded-md border border-[#555] bg-transparent px-3 text-[#ccc]">Cerrar</button>
             </div>
             {historyLoading ? <p style={{ color: '#888' }}>Cargando historial…</p> : (
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>

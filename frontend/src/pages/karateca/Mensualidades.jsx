@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import api from '../../lib/api';
-import useAuthStore from '../../store/authStore';
 
 const DOJO = { negro: '#111111', rojo: '#CC0000', dorado: '#C9A84C' };
 
@@ -39,7 +38,6 @@ function formatFechaPago(iso) {
 }
 
 export default function KaratecaMensualidadesPage() {
-  const user = useAuthStore((s) => s.user);
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -48,25 +46,26 @@ export default function KaratecaMensualidadesPage() {
     setLoading(true);
     setError(null);
     try {
-      let id = user?.karatecaId ?? user?.karateca?.id;
-      if (id == null) {
-        const { data: dash } = await api.get('/dashboard/karateca');
-        id = dash?.karateca?.id;
-      }
+      const { data: dash } = await api.get('/dashboard/karateca');
+      const id = dash?.karateca?.id;
+      const mesInicio = dash?.karateca?.mesInicioMensualidades ?? null;
       if (id == null) {
         setError('No se encontró tu perfil de karateca.');
         setItems([]);
         return;
       }
       const { data } = await api.get(`/mensualidades/karateca/${id}`);
-      setItems(Array.isArray(data) ? data : []);
+      const raw = Array.isArray(data) ? data : [];
+      setItems(
+        mesInicio ? raw.filter((row) => row.mes >= mesInicio) : raw,
+      );
     } catch (e) {
       setError(e.response?.data?.message || 'No se pudieron cargar las mensualidades');
       setItems([]);
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, []);
 
   useEffect(() => {
     load();
@@ -103,18 +102,23 @@ export default function KaratecaMensualidadesPage() {
   }
 
   return (
-    <div style={{ minHeight: '100%', background: DOJO.negro, color: '#eee', padding: '1.5rem', maxWidth: '36rem' }}>
-      <h1 style={{ margin: '0 0 1.25rem', fontSize: '1.4rem', color: DOJO.dorado }}>Mensualidades</h1>
+    <div
+      className="mx-auto w-full max-w-[36rem] p-3 md:p-6 lg:p-8"
+      style={{ minHeight: '100%', background: DOJO.negro, color: '#eee' }}
+    >
+      <h1 className="mb-4 text-lg font-semibold md:text-xl lg:text-2xl" style={{ color: DOJO.dorado }}>
+        Mensualidades
+      </h1>
 
       {error && (
         <div style={{ color: '#f88', marginBottom: '1rem', fontSize: '0.9rem' }}>{error}</div>
       )}
 
-      <section style={{ marginBottom: '1.75rem' }}>
-        <h2 style={{ margin: '0 0 0.75rem', fontSize: '0.95rem', color: '#aaa', fontWeight: 600 }}>
+      <section className="mb-6 md:mb-8">
+        <h2 className="mb-3 text-sm font-semibold md:text-base" style={{ color: DOJO.dorado }}>
           Resumen
         </h2>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.85rem' }}>
+        <div className="mb-4 flex flex-wrap gap-2">
           <span
             style={{
               background: '#1a4d2e',
@@ -159,14 +163,14 @@ export default function KaratecaMensualidadesPage() {
         )}
       </section>
 
-      <section>
-        <h2 style={{ margin: '0 0 0.75rem', fontSize: '0.95rem', color: '#aaa', fontWeight: 600 }}>
+      <section className="flex flex-col gap-3">
+        <h2 className="text-sm font-semibold md:text-base" style={{ color: DOJO.dorado }}>
           Historial
         </h2>
         {items.length === 0 ? (
           <p style={{ color: '#888', fontSize: '0.92rem', margin: 0 }}>No hay mensualidades registradas</p>
         ) : (
-          <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+          <ul className="space-y-3 lg:space-y-0" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
             {items.map((row) => {
               const mora = enMora(row.mes, row.pagado);
               let badge;
@@ -229,22 +233,15 @@ export default function KaratecaMensualidadesPage() {
               return (
                 <li
                   key={row.id}
-                  style={{
-                    display: 'flex',
-                    flexWrap: 'wrap',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: '0.65rem',
-                    padding: '0.65rem 0',
-                    borderBottom: '1px solid #333',
-                    fontSize: '0.9rem',
-                  }}
+                  className="flex flex-col gap-3 rounded-lg border border-[#C9A84C]/25 bg-[#141414] p-4 text-sm md:text-base lg:flex-row lg:items-center lg:justify-between lg:rounded-none lg:border-0 lg:border-b lg:border-[#C9A84C]/25 lg:bg-transparent lg:p-0 lg:pb-4"
                 >
-                  <div style={{ minWidth: '10rem' }}>
-                    <div style={{ fontWeight: 700, color: '#fff', marginBottom: '0.35rem' }}>{mesLargoEs(row.mes)}</div>
+                  <div className="min-w-0 sm:min-w-[10rem]">
+                    <div className="mb-2 font-bold text-white">{mesLargoEs(row.mes)}</div>
                     {badge}
                   </div>
-                  <div style={{ color: DOJO.dorado, fontWeight: 700 }}>${formatMonto(row.monto)}</div>
+                  <div className="text-lg font-bold lg:text-base" style={{ color: DOJO.dorado }}>
+                    ${formatMonto(row.monto)}
+                  </div>
                 </li>
               );
             })}

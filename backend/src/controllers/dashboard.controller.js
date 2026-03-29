@@ -119,6 +119,9 @@ async function getResumen(req, res) {
     const masDe1Mes = [];
 
     for (const k of karatecasActivos) {
+      if (k.mesInicioMensualidades && mesActual < k.mesInicioMensualidades) {
+        continue;
+      }
       const mens = mensByKarateca.get(k.id) ?? [];
       const paidCurrent = mens.some((m) => m.mes === mesActual && m.pagado === true);
       if (paidCurrent) {
@@ -260,6 +263,7 @@ async function getResumenKarateca(req, res) {
         kyuActual: karateca.kyuActual,
         preExamenAprobado: karateca.preExamenAprobado,
         fechaUltimoAscenso: karateca.fechaUltimoAscenso,
+        mesInicioMensualidades: karateca.mesInicioMensualidades,
         user: karateca.user,
       },
       asistencia: {

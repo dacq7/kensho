@@ -29,6 +29,8 @@ model User {
   email            String       @unique
   password         String
   rol              Rol
+  tipoDocumento    String?
+  numeroDocumento  String?      @unique
   telefono         String?
   fechaNacimiento  DateTime?
   fechaIngreso     DateTime     @default(now())
@@ -45,8 +47,9 @@ model Karateca {
   dan                 Int?
   preExamenAprobado   Boolean        @default(false)
   fechaUltimoAscenso  DateTime?
-  activo              Boolean        @default(true)
-  asistencias         Asistencia[]
+  activo                  Boolean        @default(true)
+  mesInicioMensualidades  String?
+  asistencias             Asistencia[]
   mensualidades       Mensualidad[]
   polizas             Poliza[]
 }

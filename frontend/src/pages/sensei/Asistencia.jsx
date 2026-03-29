@@ -145,31 +145,36 @@ export default function SenseiAsistenciaPage() {
 
   return (
     <div
+      className="p-3 md:p-6 lg:p-8"
       style={{
         minHeight: '100%',
         background: DOJO.negro,
         color: '#f5f5f5',
-        padding: '1.5rem',
       }}
     >
-      <header style={{ marginBottom: '1.5rem', borderBottom: `2px solid ${DOJO.dorado}`, paddingBottom: '0.75rem' }}>
-        <h1 style={{ margin: 0, fontSize: '1.5rem', color: DOJO.dorado, letterSpacing: '0.02em' }}>
+      <header
+        className="mb-4 border-b pb-3 md:mb-6 md:pb-4"
+        style={{ borderColor: DOJO.dorado }}
+      >
+        <h1 className="text-lg font-semibold md:text-xl lg:text-2xl" style={{ margin: 0, color: DOJO.dorado, letterSpacing: '0.02em' }}>
           Asistencia
         </h1>
-        <p style={{ margin: '0.35rem 0 0', color: '#aaa', fontSize: '0.95rem' }}>{tituloFecha}</p>
+        <p className="mt-1 text-sm text-[#aaa] md:text-base">{tituloFecha}</p>
       </header>
 
       <section
+        className="mb-4 md:mb-5"
         style={{
           background: '#1a1a1a',
           border: `1px solid ${DOJO.dorado}`,
           borderRadius: '8px',
           padding: '1rem 1.25rem',
-          marginBottom: '1.25rem',
         }}
       >
-        <h2 style={{ margin: '0 0 0.75rem', fontSize: '1rem', color: DOJO.dorado }}>Fecha y filtro del historial</h2>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.25rem', alignItems: 'flex-end' }}>
+        <h2 className="mb-3 text-sm md:text-base" style={{ color: DOJO.dorado }}>
+          Fecha y filtro del historial
+        </h2>
+        <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:gap-5">
           <label style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
             <span style={{ fontSize: '0.8rem', color: '#bbb' }}>Día de asistencia</span>
             <input
@@ -192,14 +197,10 @@ export default function SenseiAsistenciaPage() {
               <button
                 type="button"
                 onClick={() => setMesHistorial((m) => addMonthsYm(m, -1))}
+                className="min-h-[44px] min-w-[44px] cursor-pointer rounded-md border-0 font-bold text-white"
                 style={{
                   background: DOJO.rojo,
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: '6px',
                   padding: '0.45rem 0.65rem',
-                  cursor: 'pointer',
-                  fontWeight: '700',
                 }}
                 aria-label="Mes anterior"
               >
@@ -219,14 +220,10 @@ export default function SenseiAsistenciaPage() {
               <button
                 type="button"
                 onClick={() => setMesHistorial((m) => addMonthsYm(m, 1))}
+                className="min-h-[44px] min-w-[44px] cursor-pointer rounded-md border-0 font-bold text-white"
                 style={{
                   background: DOJO.rojo,
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: '6px',
                   padding: '0.45rem 0.65rem',
-                  cursor: 'pointer',
-                  fontWeight: '700',
                 }}
                 aria-label="Mes siguiente"
               >
@@ -275,19 +272,18 @@ export default function SenseiAsistenciaPage() {
           marginBottom: '1.25rem',
         }}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '0.75rem' }}>
-          <h2 style={{ margin: 0, fontSize: '1rem', color: DOJO.dorado }}>Lista del día</h2>
+        <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <h2 className="text-sm md:text-base" style={{ margin: 0, color: DOJO.dorado }}>
+            Lista del día
+          </h2>
           <button
             type="button"
             onClick={guardar}
             disabled={saving || loadingLista || karatecas.length === 0}
+            className="min-h-[44px] w-full rounded-md border-0 font-bold text-white sm:w-auto md:px-4"
             style={{
               background: DOJO.rojo,
-              color: '#fff',
-              border: 'none',
-              borderRadius: '6px',
               padding: '0.55rem 1.1rem',
-              fontWeight: '700',
               cursor: saving || loadingLista || karatecas.length === 0 ? 'not-allowed' : 'pointer',
               opacity: saving || loadingLista || karatecas.length === 0 ? 0.6 : 1,
             }}
@@ -305,14 +301,7 @@ export default function SenseiAsistenciaPage() {
             {karatecas.map((row) => (
               <li
                 key={row.id}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: '1rem',
-                  padding: '0.65rem 0',
-                  borderBottom: '1px solid #333',
-                }}
+                className="flex min-h-[44px] flex-col gap-2 border-b border-[#333] py-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, minWidth: 0 }}>
                   <span style={{ fontWeight: '600', color: '#eee' }}>{row.user?.nombre ?? `#${row.id}`}</span>
@@ -321,14 +310,15 @@ export default function SenseiAsistenciaPage() {
                     <span style={{ fontSize: '0.7rem', color: '#888' }}>(registrado)</span>
                   )}
                 </div>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', cursor: 'pointer', flexShrink: 0 }}>
+                <label className="flex min-h-[44px] shrink-0 cursor-pointer items-center gap-2">
                   <input
                     type="checkbox"
                     checked={Boolean(draft[row.id])}
                     onChange={(e) => onTogglePresente(row.id, e.target.checked)}
-                    style={{ width: '1.1rem', height: '1.1rem', accentColor: DOJO.rojo }}
+                    className="h-5 w-5"
+                    style={{ accentColor: DOJO.rojo }}
                   />
-                  <span style={{ fontSize: '0.85rem', color: '#ccc' }}>Presente</span>
+                  <span className="text-sm text-[#ccc]">Presente</span>
                 </label>
               </li>
             ))}
@@ -350,8 +340,8 @@ export default function SenseiAsistenciaPage() {
         ) : fechasHistorial.length === 0 ? (
           <p style={{ color: '#888' }}>No hay registros en este mes.</p>
         ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+          <div className="-mx-1 overflow-x-auto md:mx-0">
+            <table className="w-full min-w-[280px] border-collapse text-sm md:text-base" style={{ fontSize: '0.9rem' }}>
               <thead>
                 <tr style={{ borderBottom: `2px solid ${DOJO.dorado}`, color: DOJO.dorado, textAlign: 'left' }}>
                   <th style={{ padding: '0.5rem 0.75rem' }}>Fecha</th>

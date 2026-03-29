@@ -86,16 +86,15 @@ export default function SenseiDashboardPage() {
   }
 
   return (
-    <div style={{ minHeight: '100%', background: DOJO.negro, color: '#eee', padding: '1.5rem' }}>
-      <h1 style={{ margin: '0 0 1.25rem', fontSize: '1.6rem', color: DOJO.dorado }}>Dashboard</h1>
+    <div
+      className="p-3 text-[#eee] md:p-6 lg:p-8"
+      style={{ minHeight: '100%', background: DOJO.negro }}
+    >
+      <h1 className="mb-4 text-lg font-semibold md:mb-5 md:text-xl lg:text-2xl" style={{ color: DOJO.dorado }}>
+        Dashboard
+      </h1>
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
-          gap: '1rem',
-        }}
-      >
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {/* 1. Karatecas */}
         <button
           type="button"
@@ -355,38 +354,21 @@ export default function SenseiDashboardPage() {
       {modalAsistencia && (
         <div
           role="presentation"
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0,0,0,0.75)',
-            zIndex: 60,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '1rem',
-          }}
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/75 p-0 md:p-4"
           onClick={() => setModalAsistencia(false)}
         >
           <div
             role="dialog"
             onClick={(e) => e.stopPropagation()}
-            style={{
-              background: DOJO.negro,
-              border: `2px solid ${DOJO.dorado}`,
-              borderRadius: 12,
-              padding: '1.1rem',
-              maxWidth: '28rem',
-              width: '100%',
-              maxHeight: '80vh',
-              overflow: 'auto',
-            }}
+            className="h-full max-h-[100dvh] w-full overflow-auto rounded-none border-0 border-[#C9A84C] p-4 md:max-h-[80vh] md:max-w-[28rem] md:rounded-xl md:border-2 md:p-[1.1rem]"
+            style={{ background: DOJO.negro, borderColor: DOJO.dorado }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
               <h2 style={{ margin: 0, color: DOJO.dorado, fontSize: '1.1rem' }}>Asistencia — todos</h2>
               <button
                 type="button"
                 onClick={() => setModalAsistencia(false)}
-                style={{ border: '1px solid #555', background: 'transparent', color: '#ccc', borderRadius: 6, cursor: 'pointer' }}
+                className="min-h-[44px] min-w-[44px] cursor-pointer rounded-md border border-[#555] bg-transparent px-3 text-[#ccc]"
               >
                 Cerrar
               </button>
@@ -431,31 +413,14 @@ export default function SenseiDashboardPage() {
       {modalMensTipo && (
         <div
           role="presentation"
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0,0,0,0.75)',
-            zIndex: 60,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '1rem',
-          }}
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/75 p-0 md:p-4"
           onClick={() => setModalMensTipo(null)}
         >
           <div
             role="dialog"
             onClick={(e) => e.stopPropagation()}
-            style={{
-              background: DOJO.negro,
-              border: `2px solid ${DOJO.dorado}`,
-              borderRadius: 12,
-              padding: '1.1rem',
-              maxWidth: '26rem',
-              width: '100%',
-              maxHeight: '80vh',
-              overflow: 'auto',
-            }}
+            className="h-full max-h-[100dvh] w-full overflow-auto rounded-none border-0 border-[#C9A84C] p-4 md:max-h-[80vh] md:max-w-[26rem] md:rounded-xl md:border-2 md:p-[1.1rem]"
+            style={{ background: DOJO.negro, borderColor: DOJO.dorado }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
               <h2 style={{ margin: 0, color: DOJO.dorado, fontSize: '1.05rem' }}>
@@ -466,7 +431,7 @@ export default function SenseiDashboardPage() {
               <button
                 type="button"
                 onClick={() => setModalMensTipo(null)}
-                style={{ border: '1px solid #555', background: 'transparent', color: '#ccc', borderRadius: 6, cursor: 'pointer' }}
+                className="min-h-[44px] min-w-[44px] cursor-pointer rounded-md border border-[#555] bg-transparent px-3 text-[#ccc]"
               >
                 Cerrar
               </button>

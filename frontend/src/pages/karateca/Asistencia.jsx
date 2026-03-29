@@ -122,15 +122,20 @@ export default function KaratecaAsistenciaPage() {
   }
 
   return (
-    <div style={{ minHeight: '100%', background: DOJO.negro, color: '#eee', padding: '1.5rem', maxWidth: '40rem' }}>
-      <h1 style={{ margin: '0 0 1.25rem', fontSize: '1.4rem', color: DOJO.dorado }}>Asistencia</h1>
+    <div
+      className="mx-auto w-full max-w-[40rem] p-3 md:p-6 lg:p-8"
+      style={{ minHeight: '100%', background: DOJO.negro, color: '#eee' }}
+    >
+      <h1 className="mb-4 text-lg font-semibold md:text-xl lg:text-2xl" style={{ color: DOJO.dorado }}>
+        Asistencia
+      </h1>
 
       {error && (
         <div style={{ color: '#f88', marginBottom: '1rem', fontSize: '0.9rem' }}>{error}</div>
       )}
 
-      <section style={{ marginBottom: '1.75rem' }}>
-        <h2 style={{ margin: '0 0 0.75rem', fontSize: '0.95rem', color: '#aaa', fontWeight: 600 }}>
+      <section className="mb-6 md:mb-8">
+        <h2 className="mb-2 text-sm font-semibold text-[#aaa] md:text-base">
           Resumen
         </h2>
         <div style={{ fontSize: '2.6rem', fontWeight: 900, color: col, lineHeight: 1 }}>{promedio}%</div>
@@ -157,30 +162,19 @@ export default function KaratecaAsistenciaPage() {
         </div>
       </section>
 
-      <section>
-        <div
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '0.75rem',
-            marginBottom: '0.75rem',
-          }}
-        >
-          <h2 style={{ margin: 0, fontSize: '0.95rem', color: '#aaa', fontWeight: 600 }}>
-            Historial por mes
-          </h2>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', color: '#bbb' }}>
+      <section className="flex flex-col gap-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <h2 className="text-sm font-semibold text-[#aaa] md:text-base">Historial por mes</h2>
+          <label className="flex min-h-[44px] items-center gap-2 text-sm text-[#bbb] md:text-base">
             Filtrar
             <select
               value={filtroMes}
               onChange={(e) => setFiltroMes(e.target.value)}
+              className="min-h-[44px] flex-1 rounded-md sm:flex-initial"
               style={{
                 background: '#141414',
                 color: '#eee',
                 border: `1px solid ${DOJO.rojo}`,
-                borderRadius: 6,
                 padding: '0.3rem 0.45rem',
                 fontSize: '0.85rem',
               }}
@@ -197,70 +191,58 @@ export default function KaratecaAsistenciaPage() {
         {mesesFiltrados.length === 0 ? (
           <p style={{ color: '#888', fontSize: '0.9rem' }}>No hay registros de asistencia.</p>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
+          <div className="flex flex-col gap-3 md:gap-4">
             {mesesFiltrados.map((bloque) => {
               const c = colorPct(bloque.pct);
-              return (
-                <article
-                  key={bloque.ym}
-                  style={{
-                    background: '#1a1a1a',
-                    border: `1px solid ${DOJO.dorado}`,
-                    borderRadius: 10,
-                    padding: '0.85rem 1rem',
-                  }}
-                >
-                  <div
-                    style={{
-                      display: 'flex',
-                      flexWrap: 'wrap',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      gap: '0.5rem',
-                      marginBottom: '0.65rem',
-                    }}
+              const headerInner = (
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <h3 className="m-0 text-base capitalize text-white md:text-lg">{bloque.label}</h3>
+                  <span
+                    className="rounded-full px-2 py-0.5 text-xs font-extrabold"
+                    style={{ background: c, color: DOJO.negro }}
                   >
-                    <h3 style={{ margin: 0, fontSize: '1rem', color: '#fff', textTransform: 'capitalize' }}>
-                      {bloque.label}
-                    </h3>
-                    <span
-                      style={{
-                        background: c,
-                        color: DOJO.negro,
-                        fontWeight: 800,
-                        fontSize: '0.78rem',
-                        padding: '0.2rem 0.55rem',
-                        borderRadius: 999,
-                      }}
+                    {bloque.pct}%
+                  </span>
+                </div>
+              );
+              const listInner = (
+                <ul className="m-0 list-none p-0">
+                  {bloque.items.map((a) => (
+                    <li
+                      key={a.id}
+                      className="flex items-center gap-2 border-b border-[#2a2a2a] py-2 text-sm md:text-base"
                     >
-                      {bloque.pct}%
-                    </span>
-                  </div>
-                  <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-                    {bloque.items.map((a) => (
-                      <li
-                        key={a.id}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.5rem',
-                          padding: '0.35rem 0',
-                          borderBottom: '1px solid #2a2a2a',
-                          fontSize: '0.88rem',
-                        }}
-                      >
-                        <span style={{ fontSize: '1rem' }}>{a.presente ? '✅' : '❌'}</span>
-                        <span style={{ color: '#ccc' }}>
-                          {new Date(a.fecha).toLocaleDateString('es-ES', {
-                            weekday: 'short',
-                            day: 'numeric',
-                            month: 'short',
-                          })}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </article>
+                      <span className="text-base">{a.presente ? '✅' : '❌'}</span>
+                      <span className="text-[#ccc]">
+                        {new Date(a.fecha).toLocaleDateString('es-ES', {
+                          weekday: 'short',
+                          day: 'numeric',
+                          month: 'short',
+                        })}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              );
+              return (
+                <div key={bloque.ym}>
+                  <details
+                    className="rounded-lg border bg-[#1a1a1a] lg:hidden"
+                    style={{ borderColor: DOJO.dorado }}
+                  >
+                    <summary className="min-h-[44px] cursor-pointer list-none p-4 [&::-webkit-details-marker]:hidden">
+                      {headerInner}
+                    </summary>
+                    <div className="border-t border-[#2a2a2a] px-4 pb-4 pt-2">{listInner}</div>
+                  </details>
+                  <article
+                    className="hidden rounded-lg border bg-[#1a1a1a] p-4 lg:block"
+                    style={{ borderColor: DOJO.dorado }}
+                  >
+                    <div className="mb-3">{headerInner}</div>
+                    {listInner}
+                  </article>
+                </div>
               );
             })}
           </div>

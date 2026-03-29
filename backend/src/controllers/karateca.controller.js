@@ -7,6 +7,8 @@ const userSelectPublic = {
     nombre: true,
     email: true,
     rol: true,
+    tipoDocumento: true,
+    numeroDocumento: true,
     telefono: true,
     fechaNacimiento: true,
     fechaIngreso: true,
@@ -67,11 +69,59 @@ async function getById(req, res) {
   }
 }
 
+const TIPOS_DOC_KARATECA = new Set(['CC', 'TI', 'CE', 'PA', 'RC', 'PPT']);
+const MES_YYYY_MM = /^\d{4}-\d{2}$/;
+
+function parseMesInicioMensualidades(raw) {
+  if (raw === undefined) {
+    return { skip: true };
+  }
+  if (raw === null || (typeof raw === 'string' && raw.trim() === '')) {
+    return { value: null };
+  }
+  const t = String(raw).trim();
+  if (!MES_YYYY_MM.test(t)) {
+    return { error: "mesInicioMensualidades debe ser 'YYYY-MM'" };
+  }
+  return { value: t };
+}
+
 async function create(req, res) {
   try {
-    const { nombre, email, password, telefono, fechaNacimiento } = req.body;
-    if (!nombre || !email || !password) {
-      return res.status(400).json({ message: 'nombre, email y password son obligatorios' });
+    const {
+      nombre,
+      email,
+      password,
+      telefono,
+      fechaNacimiento,
+      tipoDocumento,
+      numeroDocumento,
+      mesInicioMensualidades,
+    } = req.body;
+    if (!nombre || !email || !password || !tipoDocumento || !numeroDocumento) {
+      return res.status(400).json({
+        message:
+          'nombre, email, password, tipoDocumento y numeroDocumento son obligatorios',
+      });
+    }
+
+    if (!TIPOS_DOC_KARATECA.has(String(tipoDocumento).trim())) {
+      return res.status(400).json({ message: 'tipoDocumento no válido' });
+    }
+
+    const doc = String(numeroDocumento).trim();
+    if (!/^\d+$/.test(doc)) {
+      return res.status(400).json({ message: 'numeroDocumento debe contener solo dígitos' });
+    }
+
+    const duplicado = await prisma.user.findUnique({ where: { numeroDocumento: doc } });
+    if (duplicado) {
+      return res.status(400).json({ message: 'Ya existe un karateca con ese número de documento' });
+    }
+
+    const mesIniParsed = parseMesInicioMensualidades(mesInicioMensualidades);
+    if (mesIniParsed.error) {
+      return res.status(400).json({ message: mesIniParsed.error });
     }
 
     const hashed = await bcrypt.hash(password, 10);
@@ -83,12 +133,17 @@ async function create(req, res) {
           email,
           password: hashed,
           rol: 'KARATECA',
+          tipoDocumento: String(tipoDocumento).trim(),
+          numeroDocumento: doc,
           telefono: telefono ?? undefined,
           fechaNacimiento: fechaNacimiento ? new Date(fechaNacimiento) : undefined,
         },
       });
       const k = await tx.karateca.create({
-        data: { userId: user.id },
+        data: {
+          userId: user.id,
+          ...(!mesIniParsed.skip && { mesInicioMensualidades: mesIniParsed.value }),
+        },
         include: {
           user: userSelectPublic,
         },
@@ -99,7 +154,14 @@ async function create(req, res) {
     return res.status(201).json(result);
   } catch (err) {
     if (err.code === 'P2002') {
-      return res.status(409).json({ message: 'El email ya está registrado' });
+      const target = err.meta?.target;
+      const isDoc =
+        Array.isArray(target) && target.includes('numeroDocumento');
+      return res.status(isDoc ? 400 : 409).json({
+        message: isDoc
+          ? 'Ya existe un karateca con ese número de documento'
+          : 'El email ya está registrado',
+      });
     }
     console.error('ERROR create:', err);
     return res.status(500).json({ message: 'Error del servidor' });
@@ -113,11 +175,29 @@ async function update(req, res) {
       return res.status(400).json({ message: 'ID inválido' });
     }
 
-    const { nombre, telefono, fechaNacimiento } = req.body;
+    const { nombre, telefono, fechaNacimiento, tipoDocumento, numeroDocumento, mesInicioMensualidades } =
+      req.body;
 
     const karateca = await prisma.karateca.findUnique({ where: { id } });
     if (!karateca) {
       return res.status(404).json({ message: 'Karateca no encontrado' });
+    }
+
+    if (tipoDocumento !== undefined && !TIPOS_DOC_KARATECA.has(String(tipoDocumento).trim())) {
+      return res.status(400).json({ message: 'tipoDocumento no válido' });
+    }
+
+    if (numeroDocumento !== undefined) {
+      const doc = String(numeroDocumento).trim();
+      if (!/^\d+$/.test(doc)) {
+        return res.status(400).json({ message: 'numeroDocumento debe contener solo dígitos' });
+      }
+      const otro = await prisma.user.findFirst({
+        where: { numeroDocumento: doc, NOT: { id: karateca.userId } },
+      });
+      if (otro) {
+        return res.status(400).json({ message: 'Ya existe un karateca con ese número de documento' });
+      }
     }
 
     const user = await prisma.user.update({
@@ -128,12 +208,32 @@ async function update(req, res) {
         ...(fechaNacimiento !== undefined && {
           fechaNacimiento: fechaNacimiento ? new Date(fechaNacimiento) : null,
         }),
+        ...(tipoDocumento !== undefined && { tipoDocumento: String(tipoDocumento).trim() }),
+        ...(numeroDocumento !== undefined && { numeroDocumento: String(numeroDocumento).trim() }),
       },
       ...userSelectPublic,
     });
 
+    if (mesInicioMensualidades !== undefined) {
+      const mesIniParsed = parseMesInicioMensualidades(mesInicioMensualidades);
+      if (mesIniParsed.error) {
+        return res.status(400).json({ message: mesIniParsed.error });
+      }
+      await prisma.karateca.update({
+        where: { id },
+        data: { mesInicioMensualidades: mesIniParsed.value },
+      });
+    }
+
     return res.json(user);
   } catch (err) {
+    if (err.code === 'P2002') {
+      const target = err.meta?.target;
+      const isDoc = Array.isArray(target) && target.includes('numeroDocumento');
+      if (isDoc) {
+        return res.status(400).json({ message: 'Ya existe un karateca con ese número de documento' });
+      }
+    }
     console.error('ERROR update:', err);
     return res.status(500).json({ message: 'Error del servidor' });
   }
@@ -237,6 +337,10 @@ async function remove(req, res) {
     }
 
     await prisma.$transaction(async (tx) => {
+      await tx.asistencia.deleteMany({ where: { karatecaId: id } });
+      await tx.mensualidad.deleteMany({ where: { karatecaId: id } });
+      await tx.poliza.deleteMany({ where: { karatecaId: id } });
+
       const karateca = await tx.karateca.findUnique({ where: { id } });
       if (!karateca) {
         const error = new Error('NOT_FOUND');
@@ -244,9 +348,7 @@ async function remove(req, res) {
         throw error;
       }
 
-      await tx.asistencia.deleteMany({ where: { karatecaId: id } });
-      await tx.mensualidad.deleteMany({ where: { karatecaId: id } });
-      await tx.poliza.deleteMany({ where: { karatecaId: id } });
+      await tx.asistencia.deleteMany({ where: { registradoPorId: karateca.userId } });
       await tx.karateca.delete({ where: { id } });
       await tx.user.delete({ where: { id: karateca.userId } });
     });
