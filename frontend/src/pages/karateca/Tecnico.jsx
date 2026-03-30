@@ -247,7 +247,7 @@ export default function KaratecaTecnicoPage() {
   const preExamen = Boolean(data?.karateca?.preExamenAprobado);
 
   const siguienteColor = SIGUIENTE_COLOR[kyuActual];
-  const tech = KYU_TECNICO[SIGUIENTE_COLOR[kyuActual]] ?? null;
+  const contenido = KYU_TECNICO[SIGUIENTE_COLOR[kyuActual]] || null;
 
   if (loading) {
     return (
@@ -308,7 +308,7 @@ export default function KaratecaTecnicoPage() {
         )}
       </section>
 
-      {!tech ? (
+      {!contenido ? (
         <p style={{ color: '#aaa', fontSize: '0.95rem' }}>
           No hay programa de kyu cargado para tu grado actual. Consulta al Sensei.
         </p>
@@ -320,7 +320,7 @@ export default function KaratecaTecnicoPage() {
               Kata para el ascenso
             </h2>
             <ul style={{ margin: 0, paddingLeft: '1.1rem', color: '#e8e8e8', lineHeight: 1.65 }}>
-              {tech.kata.map((k) => (
+              {contenido.kata.map((k) => (
                 <li key={k} style={{ marginBottom: '0.35rem' }}>
                   <span style={{ marginRight: '0.35rem' }} aria-hidden>
                     📖
@@ -337,7 +337,7 @@ export default function KaratecaTecnicoPage() {
               Kumite requerido
             </h2>
             <ul style={{ margin: 0, paddingLeft: '1.1rem', color: '#e8e8e8', lineHeight: 1.65 }}>
-              {tech.kumite.map((k) => (
+              {contenido.kumite.map((k) => (
                 <li key={k} style={{ marginBottom: '0.35rem' }}>
                   <span style={{ marginRight: '0.35rem' }} aria-hidden>
                     ⚔️
@@ -362,7 +362,7 @@ export default function KaratecaTecnicoPage() {
                 lineHeight: 1.55,
               }}
             >
-              {tech.kihon.map((line, idx) => (
+              {contenido.kihon.map((line, idx) => (
                 <li key={`${idx}-${line.slice(0, 24)}`} style={{ marginBottom: '0.55rem' }}>
                   <span style={{ display: 'flex', gap: '0.55rem', alignItems: 'flex-start' }}>
                     <span style={checkboxStyle} title="" aria-hidden />
