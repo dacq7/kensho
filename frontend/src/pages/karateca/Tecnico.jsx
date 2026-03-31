@@ -210,6 +210,14 @@ const SIGUIENTE_COLOR = {
   '1kyu': '1dan',
 };
 
+const PINTA_HEREDA_DE = {
+  'pinta_7kyu': '7kyu',
+  'pinta_6kyu': '6kyu',
+  'pinta_5kyu': '5kyu',
+  'pinta_4kyu': '4kyu',
+  'pinta_3kyu': '3kyu',
+};
+
 const checkboxStyle = {
   width: '1rem',
   height: '1rem',
@@ -247,7 +255,8 @@ export default function KaratecaTecnicoPage() {
   const preExamen = Boolean(data?.karateca?.preExamenAprobado);
 
   const siguienteColor = SIGUIENTE_COLOR[kyuActual];
-  const contenido = KYU_TECNICO[SIGUIENTE_COLOR[kyuActual]] || null;
+  const claveContenido = PINTA_HEREDA_DE[kyuActual] || kyuActual;
+  const contenido = KYU_TECNICO[claveContenido] || null;
 
   if (loading) {
     return (
