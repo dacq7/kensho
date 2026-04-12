@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { CalendarCheck, Users } from 'lucide-react';
 import api from '../../lib/api';
 import { KyuBadge } from '../../lib/kyuUtils';
+import { EmptyState } from '../../components/ui';
 
 const DOJO = {
   negro: '#111111',
@@ -295,7 +297,11 @@ export default function SenseiAsistenciaPage() {
         {loadingLista ? (
           <p style={{ color: '#888' }}>Cargando…</p>
         ) : karatecas.length === 0 ? (
-          <p style={{ color: '#888' }}>No hay karatecas activos.</p>
+          <EmptyState
+            icon={Users}
+            title="No hay karatecas activos"
+            description="Registra alumnos para poder tomar asistencia"
+          />
         ) : (
           <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
             {karatecas.map((row) => (
@@ -338,7 +344,11 @@ export default function SenseiAsistenciaPage() {
         {loadingHistorial ? (
           <p style={{ color: '#888' }}>Cargando historial…</p>
         ) : fechasHistorial.length === 0 ? (
-          <p style={{ color: '#888' }}>No hay registros en este mes.</p>
+          <EmptyState
+            icon={CalendarCheck}
+            title="Sin historial"
+            description="No se han registrado clases aún"
+          />
         ) : (
           <div className="-mx-1 overflow-x-auto md:mx-0">
             <table className="w-full min-w-[280px] border-collapse text-sm md:text-base" style={{ fontSize: '0.9rem' }}>

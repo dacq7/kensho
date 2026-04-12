@@ -4,3 +4,4 @@ export { Badge } from './Badge';
 export { Card } from './Card';
 export { Modal } from './Modal';
 export { Skeleton, SkeletonCard } from './Skeleton';
+export { EmptyState } from './EmptyState';

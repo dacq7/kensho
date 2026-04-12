@@ -1,6 +1,6 @@
-import { Pencil, ToggleLeft, ToggleRight, Trash2 } from 'lucide-react';
+import { Pencil, ToggleLeft, ToggleRight, Trash2, Users } from 'lucide-react';
 import { GRADO_INFO } from '../../lib/kyuUtils';
-import { Badge, Button } from '../ui';
+import { Badge, Button, EmptyState } from '../ui';
 
 function gradoValue(row) {
   if (typeof row.dan === 'number' && row.dan >= 1) return `${row.dan}dan`;
@@ -43,8 +43,12 @@ export default function KaratecasCards({ rows, loading, onEdit, onToggleActivo, 
 
   if (rows.length === 0) {
     return (
-      <div className="space-y-3 lg:hidden">
-        <p className="py-8 text-center text-white/50">No hay resultados</p>
+      <div className="lg:hidden">
+        <EmptyState
+          icon={Users}
+          title="No hay karatecas"
+          description="Ajusta los filtros o registra un nuevo alumno"
+        />
       </div>
     );
   }

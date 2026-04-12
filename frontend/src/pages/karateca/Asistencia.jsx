@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { CalendarCheck } from 'lucide-react';
 import api from '../../lib/api';
 import useAuthStore from '../../store/authStore';
+import { EmptyState } from '../../components/ui';
 
 const DOJO = { negro: '#111111', rojo: '#CC0000', dorado: '#C9A84C' };
 
@@ -189,7 +191,11 @@ export default function KaratecaAsistenciaPage() {
         </div>
 
         {mesesFiltrados.length === 0 ? (
-          <p style={{ color: '#888', fontSize: '0.9rem' }}>No hay registros de asistencia.</p>
+          <EmptyState
+            icon={CalendarCheck}
+            title="Sin registros"
+            description="No hay clases registradas para este período"
+          />
         ) : (
           <div className="flex flex-col gap-3 md:gap-4">
             {mesesFiltrados.map((bloque) => {

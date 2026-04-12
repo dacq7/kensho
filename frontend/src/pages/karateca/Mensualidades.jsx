@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { DollarSign } from 'lucide-react';
 import api from '../../lib/api';
+import { EmptyState } from '../../components/ui';
 
 const DOJO = { negro: '#111111', rojo: '#CC0000', dorado: '#C9A84C' };
 
@@ -168,7 +170,11 @@ export default function KaratecaMensualidadesPage() {
           Historial
         </h2>
         {items.length === 0 ? (
-          <p style={{ color: '#888', fontSize: '0.92rem', margin: 0 }}>No hay mensualidades registradas</p>
+          <EmptyState
+            icon={DollarSign}
+            title="Sin mensualidades"
+            description="No hay pagos registrados para este período"
+          />
         ) : (
           <ul className="space-y-3 lg:space-y-0" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
             {items.map((row) => {

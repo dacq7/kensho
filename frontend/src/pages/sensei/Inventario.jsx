@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Pencil, Plus, Trash2 } from 'lucide-react';
+import { Package, Pencil, Plus, Trash2 } from 'lucide-react';
 import api from '../../lib/api';
+import { EmptyState } from '../../components/ui';
 
 const DOJO = { negro: '#111111', rojo: '#CC0000', dorado: '#C9A84C' };
 
@@ -239,6 +240,13 @@ export default function SenseiInventarioPage() {
       >
         {loading ? (
           <p style={{ color: '#888', margin: 0 }}>Cargando…</p>
+        ) : items.length === 0 ? (
+          <EmptyState
+            icon={Package}
+            title="Inventario vacío"
+            description="Agrega equipos y materiales del dojo"
+            action={{ label: 'Agregar ítem', onClick: openCreate }}
+          />
         ) : (
           <>
             <div className="space-y-3 lg:hidden">
