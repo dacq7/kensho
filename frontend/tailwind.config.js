@@ -13,6 +13,7 @@ export default {
         },
       },
       fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
         dojo: ['Inter', 'system-ui', 'sans-serif'],
       },
     },
