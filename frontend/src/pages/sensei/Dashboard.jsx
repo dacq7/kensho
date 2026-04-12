@@ -1,13 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../lib/api';
+import { Badge, Button, Card, Modal, SkeletonCard } from '../../components/ui';
 
-const DOJO = { negro: '#111111', rojo: '#CC0000', dorado: '#C9A84C' };
-
-function colorAsistencia(p) {
-  if (p >= 80) return '#6ecf7a';
-  if (p >= 50) return '#e6c84c';
-  return '#e85c5c';
+function colorAsistenciaClass(p) {
+  if (p >= 80) return 'text-emerald-400 font-bold';
+  if (p >= 50) return 'text-amber-400 font-bold';
+  return 'text-dojo-rojo font-bold';
 }
 
 function promedioGeneral(list) {
@@ -15,15 +14,6 @@ function promedioGeneral(list) {
   const sum = list.reduce((a, x) => a + x.promedio, 0);
   return Math.round(sum / list.length);
 }
-
-const cardBase = {
-  background: '#1a1a1a',
-  border: `1px solid ${DOJO.dorado}`,
-  borderRadius: 12,
-  padding: '1.1rem',
-  cursor: 'pointer',
-  transition: 'transform 0.15s ease, box-shadow 0.15s ease',
-};
 
 export default function SenseiDashboardPage() {
   const navigate = useNavigate();
@@ -71,94 +61,57 @@ export default function SenseiDashboardPage() {
 
   if (loading) {
     return (
-      <div style={{ padding: '1.5rem', background: DOJO.negro, color: '#ccc', minHeight: '100%' }}>
-        Cargando…
+      <div className="min-h-full bg-dojo-negro p-3 md:p-6 lg:p-8">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+        </div>
       </div>
     );
   }
 
   if (error || !data) {
     return (
-      <div style={{ padding: '1.5rem', background: DOJO.negro, color: '#f88', minHeight: '100%' }}>
-        {error || 'Sin datos'}
+      <div className="min-h-full bg-dojo-negro p-3 md:p-6 lg:p-8">
+        <div
+          className="rounded-lg border border-dojo-rojo/50 bg-dojo-rojo/20 px-4 py-3 text-sm text-red-200"
+          role="alert"
+        >
+          {error || 'Sin datos'}
+        </div>
       </div>
     );
   }
 
   return (
-    <div
-      className="p-3 text-[#eee] md:p-6 lg:p-8"
-      style={{ minHeight: '100%', background: DOJO.negro }}
-    >
-      <h1 className="mb-4 text-lg font-semibold md:mb-5 md:text-xl lg:text-2xl" style={{ color: DOJO.dorado }}>
+    <div className="min-h-full bg-dojo-negro p-3 text-white/90 md:p-6 lg:p-8">
+      <h1 className="mb-4 text-lg font-semibold text-dojo-dorado md:mb-5 md:text-xl lg:text-2xl">
         Dashboard
       </h1>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {/* 1. Karatecas */}
-        <button
-          type="button"
-          onClick={() => navigate('/sensei/karatecas')}
-          style={{
-            ...cardBase,
-            textAlign: 'left',
-            borderColor: DOJO.dorado,
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-3px)';
-            e.currentTarget.style.boxShadow = `0 8px 24px rgba(201,168,76,0.15)`;
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'none';
-            e.currentTarget.style.boxShadow = 'none';
-          }}
-        >
-          <div style={{ fontSize: '0.85rem', color: '#aaa', marginBottom: '0.35rem' }}>Karatecas activos</div>
-          <div style={{ fontSize: '2.2rem', fontWeight: 800, color: DOJO.dorado, lineHeight: 1.1 }}>
+        <Card onClick={() => navigate('/sensei/karatecas')}>
+          <p className="mb-1.5 text-sm text-white/60">Karatecas activos</p>
+          <p className="text-4xl font-extrabold leading-tight text-dojo-dorado">
             {data.karatecas.total}
-          </div>
-          <div style={{ fontSize: '0.85rem', color: '#bbb', marginTop: '0.5rem' }}>
+          </p>
+          <p className="mt-2 text-sm text-white/65">
             {data.karatecas.preExamenAprobado} con pre-examen aprobado
-          </div>
-        </button>
+          </p>
+        </Card>
 
         {/* 2. Asistencia */}
-        <div
-          role="button"
-          tabIndex={0}
-          onClick={() => navigate('/sensei/asistencia')}
-          onKeyDown={(e) => e.key === 'Enter' && navigate('/sensei/asistencia')}
-          style={{
-            ...cardBase,
-            cursor: 'pointer',
-            gridColumn: 'span 1',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-3px)';
-            e.currentTarget.style.boxShadow = `0 8px 24px rgba(201,168,76,0.12)`;
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'none';
-            e.currentTarget.style.boxShadow = 'none';
-          }}
-        >
-          <div style={{ fontSize: '0.85rem', color: '#aaa', marginBottom: '0.35rem' }}>Asistencia general</div>
-          <div style={{ fontSize: '2rem', fontWeight: 800, color: DOJO.dorado, marginBottom: '0.65rem' }}>
-            {promedioDojo}%
-          </div>
-          <div style={{ fontSize: '0.75rem', color: '#888', marginBottom: '0.5rem' }}>Promedio del dojo</div>
-          <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+        <Card onClick={() => navigate('/sensei/asistencia')}>
+          <p className="mb-1.5 text-sm text-white/60">Asistencia general</p>
+          <p className="mb-2.5 text-4xl font-extrabold text-dojo-dorado">{promedioDojo}%</p>
+          <p className="mb-2 text-xs text-white/50">Promedio del dojo</p>
+          <ul className="m-0 list-none p-0">
             {top5.map((row) => (
               <li
                 key={row.karatecaId}
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  padding: '0.25rem 0',
-                  fontSize: '0.85rem',
-                  borderBottom: '1px solid #2a2a2a',
-                }}
+                className="flex items-center justify-between border-b border-white/10 py-1.5 text-sm last:border-0"
               >
                 <button
                   type="button"
@@ -166,315 +119,151 @@ export default function SenseiDashboardPage() {
                     e.stopPropagation();
                     navigate('/sensei/asistencia');
                   }}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: DOJO.dorado,
-                    cursor: 'pointer',
-                    padding: 0,
-                    textAlign: 'left',
-                    fontWeight: 600,
-                  }}
+                  className="cursor-pointer border-0 bg-transparent p-0 text-left font-semibold text-dojo-dorado"
                 >
                   {row.nombre}
                 </button>
-                <span style={{ color: colorAsistencia(row.promedio), fontWeight: 700 }}>{row.promedio}%</span>
+                <span className={colorAsistenciaClass(row.promedio)}>{row.promedio}%</span>
               </li>
             ))}
           </ul>
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="sm"
+            className="mt-2.5 w-full"
             onClick={(e) => {
               e.stopPropagation();
               setModalAsistencia(true);
             }}
-            style={{
-              marginTop: '0.65rem',
-              width: '100%',
-              border: `1px solid ${DOJO.dorado}`,
-              background: 'transparent',
-              color: DOJO.dorado,
-              borderRadius: 8,
-              padding: '0.35rem',
-              fontSize: '0.8rem',
-              cursor: 'pointer',
-            }}
           >
             Ver todos
-          </button>
-        </div>
+          </Button>
+        </Card>
 
         {/* 3. Mensualidades */}
-        <div
-          style={{
-            ...cardBase,
-            cursor: 'default',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-3px)';
-            e.currentTarget.style.boxShadow = `0 8px 24px rgba(201,168,76,0.12)`;
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'none';
-            e.currentTarget.style.boxShadow = 'none';
-          }}
-        >
-          <div style={{ fontSize: '0.85rem', color: '#aaa', marginBottom: '0.65rem' }}>Mensualidades</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+        <Card>
+          <p className="mb-2.5 text-sm text-white/60">Mensualidades</p>
+          <div className="flex flex-col gap-2">
             <button
               type="button"
               onClick={() => setModalMensTipo('alDia')}
-              style={{
-                border: 'none',
-                borderRadius: 8,
-                background: '#1a4d2e',
-                color: '#b8f5c8',
-                padding: '0.45rem 0.65rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                fontSize: '0.85rem',
-              }}
+              className="min-h-[44px] w-full cursor-pointer rounded-lg bg-emerald-900/50 px-3 py-2 text-sm font-bold text-emerald-300 transition-colors hover:bg-emerald-900/70"
             >
               {data.mensualidades.alDia.length} al día
             </button>
             <button
               type="button"
               onClick={() => setModalMensTipo('unMes')}
-              style={{
-                border: 'none',
-                borderRadius: 8,
-                background: '#6b5a00',
-                color: '#ffe9a0',
-                padding: '0.45rem 0.65rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                fontSize: '0.85rem',
-              }}
+              className="min-h-[44px] w-full cursor-pointer rounded-lg bg-amber-900/50 px-3 py-2 text-sm font-bold text-amber-300 transition-colors hover:bg-amber-900/70"
             >
               {data.mensualidades.unMes.length} deben 1 mes
             </button>
             <button
               type="button"
               onClick={() => setModalMensTipo('masDe1Mes')}
-              style={{
-                border: 'none',
-                borderRadius: 8,
-                background: 'rgba(204,0,0,0.35)',
-                color: '#ffc8c8',
-                padding: '0.45rem 0.65rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                fontSize: '0.85rem',
-              }}
+              className="min-h-[44px] w-full cursor-pointer rounded-lg bg-dojo-rojo/30 px-3 py-2 text-sm font-bold text-red-300 transition-colors hover:bg-dojo-rojo/40"
             >
               {data.mensualidades.masDe1Mes.length} deben +1 mes
             </button>
           </div>
-          <button
-            type="button"
+          <Button
+            variant="secondary"
+            size="sm"
+            className="mt-3 w-full"
             onClick={() => navigate('/sensei/mensualidades')}
-            style={{
-              marginTop: '0.75rem',
-              width: '100%',
-              border: `1px solid ${DOJO.rojo}`,
-              background: 'transparent',
-              color: '#faa',
-              borderRadius: 8,
-              padding: '0.35rem',
-              fontSize: '0.78rem',
-              cursor: 'pointer',
-            }}
           >
             Ir a mensualidades
-          </button>
-        </div>
+          </Button>
+        </Card>
 
         {/* 4. Pólizas */}
-        <button
-          type="button"
-          onClick={() => navigate('/sensei/polizas')}
-          style={{ ...cardBase, textAlign: 'left' }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-3px)';
-            e.currentTarget.style.boxShadow = `0 8px 24px rgba(201,168,76,0.12)`;
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'none';
-            e.currentTarget.style.boxShadow = 'none';
-          }}
-        >
-          <div style={{ fontSize: '0.85rem', color: '#aaa', marginBottom: '0.65rem' }}>Pólizas</div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
-            <span style={{ background: '#1a4d2e', color: '#9f9', padding: '0.3rem 0.55rem', borderRadius: 999, fontSize: '0.78rem', fontWeight: 700 }}>
-              {data.polizas.activas} activas
-            </span>
-            <span style={{ background: '#7a4b00', color: '#ffd08a', padding: '0.3rem 0.55rem', borderRadius: 999, fontSize: '0.78rem', fontWeight: 700 }}>
-              {data.polizas.porVencer} por vencer
-            </span>
-            <span style={{ background: 'rgba(204,0,0,0.35)', color: '#faa', padding: '0.3rem 0.55rem', borderRadius: 999, fontSize: '0.78rem', fontWeight: 700 }}>
-              {data.polizas.vencidas} vencidas
-            </span>
+        <Card onClick={() => navigate('/sensei/polizas')}>
+          <p className="mb-2.5 text-sm text-white/60">Pólizas</p>
+          <div className="flex flex-wrap gap-2">
+            <Badge variant="success">{data.polizas.activas} activas</Badge>
+            <Badge variant="warning">{data.polizas.porVencer} por vencer</Badge>
+            <Badge variant="danger">{data.polizas.vencidas} vencidas</Badge>
           </div>
-        </button>
+        </Card>
 
         {/* 5. Inventario */}
-        <button
-          type="button"
-          onClick={() => navigate('/sensei/inventario')}
-          style={{ ...cardBase, textAlign: 'left' }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-3px)';
-            e.currentTarget.style.boxShadow = `0 8px 24px rgba(201,168,76,0.12)`;
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'none';
-            e.currentTarget.style.boxShadow = 'none';
-          }}
-        >
-          <div style={{ fontSize: '0.85rem', color: '#aaa', marginBottom: '0.65rem' }}>Inventario</div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '0.5rem' }}>
-            <span style={{ background: '#1a4d2e', color: '#9f9', padding: '0.3rem 0.55rem', borderRadius: 999, fontSize: '0.78rem', fontWeight: 700 }}>
-              {data.inventario.bueno} bueno
-            </span>
-            <span style={{ background: '#7a4b00', color: '#ffd08a', padding: '0.3rem 0.55rem', borderRadius: 999, fontSize: '0.78rem', fontWeight: 700 }}>
-              {data.inventario.regular} regular
-            </span>
-            <span style={{ background: 'rgba(204,0,0,0.35)', color: '#faa', padding: '0.3rem 0.55rem', borderRadius: 999, fontSize: '0.78rem', fontWeight: 700 }}>
-              {data.inventario.malo} malo
-            </span>
+        <Card onClick={() => navigate('/sensei/inventario')}>
+          <p className="mb-2.5 text-sm text-white/60">Inventario</p>
+          <div className="mb-2 flex flex-wrap gap-2">
+            <Badge variant="success">{data.inventario.bueno} bueno</Badge>
+            <Badge variant="warning">{data.inventario.regular} regular</Badge>
+            <Badge variant="danger">{data.inventario.malo} malo</Badge>
           </div>
           {data.inventario.malo > 0 && (
-            <div style={{ color: '#ff6b6b', fontSize: '0.82rem', fontWeight: 700 }}>
+            <p className="text-sm font-bold text-dojo-rojo">
               ⚠ {data.inventario.malo} ítems en mal estado
-            </div>
+            </p>
           )}
-        </button>
+        </Card>
       </div>
 
-      {modalAsistencia && (
-        <div
-          role="presentation"
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/75 p-0 md:p-4"
-          onClick={() => setModalAsistencia(false)}
-        >
-          <div
-            role="dialog"
-            onClick={(e) => e.stopPropagation()}
-            className="h-full max-h-[100dvh] w-full overflow-auto rounded-none border-0 border-[#C9A84C] p-4 md:max-h-[80vh] md:max-w-[28rem] md:rounded-xl md:border-2 md:p-[1.1rem]"
-            style={{ background: DOJO.negro, borderColor: DOJO.dorado }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-              <h2 style={{ margin: 0, color: DOJO.dorado, fontSize: '1.1rem' }}>Asistencia — todos</h2>
+      <Modal
+        open={modalAsistencia}
+        onClose={() => setModalAsistencia(false)}
+        title="Asistencia — todos"
+      >
+        <ul className="m-0 list-none p-0">
+          {asistenciaOrdenada.map((row) => (
+            <li
+              key={row.karatecaId}
+              className="flex items-center justify-between border-b border-white/10 py-2 text-sm last:border-0"
+            >
               <button
                 type="button"
-                onClick={() => setModalAsistencia(false)}
-                className="min-h-[44px] min-w-[44px] cursor-pointer rounded-md border border-[#555] bg-transparent px-3 text-[#ccc]"
+                onClick={() => {
+                  setModalAsistencia(false);
+                  navigate('/sensei/asistencia');
+                }}
+                className="cursor-pointer border-0 bg-transparent p-0 font-semibold text-dojo-dorado"
               >
-                Cerrar
+                {row.nombre}
               </button>
-            </div>
-            <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-              {asistenciaOrdenada.map((row) => (
-                <li
-                  key={row.karatecaId}
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    padding: '0.4rem 0',
-                    borderBottom: '1px solid #333',
-                    fontSize: '0.88rem',
-                  }}
-                >
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setModalAsistencia(false);
-                      navigate('/sensei/asistencia');
-                    }}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      color: DOJO.dorado,
-                      cursor: 'pointer',
-                      fontWeight: 600,
-                      padding: 0,
-                    }}
-                  >
-                    {row.nombre}
-                  </button>
-                  <span style={{ color: colorAsistencia(row.promedio), fontWeight: 700 }}>{row.promedio}%</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      )}
+              <span className={colorAsistenciaClass(row.promedio)}>{row.promedio}%</span>
+            </li>
+          ))}
+        </ul>
+      </Modal>
 
-      {modalMensTipo && (
-        <div
-          role="presentation"
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/75 p-0 md:p-4"
-          onClick={() => setModalMensTipo(null)}
-        >
-          <div
-            role="dialog"
-            onClick={(e) => e.stopPropagation()}
-            className="h-full max-h-[100dvh] w-full overflow-auto rounded-none border-0 border-[#C9A84C] p-4 md:max-h-[80vh] md:max-w-[26rem] md:rounded-xl md:border-2 md:p-[1.1rem]"
-            style={{ background: DOJO.negro, borderColor: DOJO.dorado }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-              <h2 style={{ margin: 0, color: DOJO.dorado, fontSize: '1.05rem' }}>
-                {modalMensTipo === 'alDia' && 'Al día'}
-                {modalMensTipo === 'unMes' && 'Deben 1 mes'}
-                {modalMensTipo === 'masDe1Mes' && 'Deben +1 mes'}
-              </h2>
+      <Modal
+        open={!!modalMensTipo}
+        onClose={() => setModalMensTipo(null)}
+        title={
+          modalMensTipo === 'alDia'
+            ? 'Al día'
+            : modalMensTipo === 'unMes'
+              ? 'Deben 1 mes'
+              : 'Deben +1 mes'
+        }
+      >
+        <ul className="m-0 list-none p-0">
+          {mensList(modalMensTipo).map((row) => (
+            <li
+              key={row.karatecaId}
+              className="flex items-center justify-between border-b border-white/10 py-2.5 text-sm last:border-0"
+            >
               <button
                 type="button"
-                onClick={() => setModalMensTipo(null)}
-                className="min-h-[44px] min-w-[44px] cursor-pointer rounded-md border border-[#555] bg-transparent px-3 text-[#ccc]"
+                onClick={() => {
+                  setModalMensTipo(null);
+                  navigate('/sensei/mensualidades');
+                }}
+                className="cursor-pointer border-0 bg-transparent p-0 font-semibold text-dojo-dorado"
               >
-                Cerrar
+                {row.nombre}
               </button>
-            </div>
-            <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-              {mensList(modalMensTipo).map((row) => (
-                <li
-                  key={row.karatecaId}
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    padding: '0.45rem 0',
-                    borderBottom: '1px solid #333',
-                    fontSize: '0.88rem',
-                  }}
-                >
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setModalMensTipo(null);
-                      navigate('/sensei/mensualidades');
-                    }}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      color: DOJO.dorado,
-                      cursor: 'pointer',
-                      fontWeight: 600,
-                      padding: 0,
-                    }}
-                  >
-                    {row.nombre}
-                  </button>
-                  <span style={{ color: '#aaa' }}>{row.kyu}</span>
-                </li>
-              ))}
-            </ul>
-            {mensList(modalMensTipo).length === 0 && (
-              <p style={{ color: '#888', margin: '0.5rem 0 0' }}>No hay karatecas en esta categoría.</p>
-            )}
-          </div>
-        </div>
-      )}
+              <span className="text-white/60">{row.kyu}</span>
+            </li>
+          ))}
+        </ul>
+        {mensList(modalMensTipo).length === 0 && (
+          <p className="mt-2 text-sm text-white/50">No hay karatecas en esta categoría.</p>
+        )}
+      </Modal>
     </div>
   );
 }
