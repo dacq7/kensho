@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Pencil, Trash2 } from 'lucide-react';
 import api from '../../lib/api';
 import { KyuBadge } from '../../lib/kyuUtils';
+import { formatFechaCorta } from '../../lib/dateUtils';
 import { Badge, Button, Card, Input, Modal, Skeleton, SkeletonCard } from '../../components/ui';
 
 function gradoValue(row) {
@@ -15,12 +16,7 @@ function ymd(date) {
 }
 
 function formatFecha(iso) {
-  if (!iso) return '—';
-  return new Date(iso).toLocaleDateString('es-ES', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  });
+  return formatFechaCorta(iso);
 }
 
 function polizaEstadoBadge(estado) {

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import api from '../../lib/api';
 import { KyuBadge } from '../../lib/kyuUtils';
+import { formatFechaHora } from '../../lib/dateUtils';
 import { Badge, Button, Card, Input, Modal, Skeleton } from '../../components/ui';
 
 const CONFIG_CLAVE = 'mensualidad_valor';
@@ -40,14 +41,7 @@ function gradoValue(row) {
 }
 
 function formatFechaPago(iso) {
-  if (!iso) return '—';
-  return new Date(iso).toLocaleString('es-ES', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+  return formatFechaHora(iso);
 }
 
 export default function SenseiMensualidadesPage() {

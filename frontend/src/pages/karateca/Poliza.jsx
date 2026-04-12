@@ -1,16 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import api from '../../lib/api';
 import useAuthStore from '../../store/authStore';
+import { formatFecha } from '../../lib/dateUtils';
 import { Badge, Card, SkeletonCard } from '../../components/ui';
-
-function formatFecha(iso) {
-  if (!iso) return '—';
-  return new Date(iso).toLocaleDateString('es-ES', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  });
-}
 
 /** Diferencia en días entre la fecha de vencimiento (solo día) y hoy. Positivo = aún no vence ese día. */
 function diasRelativoVencimiento(fechaVencimiento) {

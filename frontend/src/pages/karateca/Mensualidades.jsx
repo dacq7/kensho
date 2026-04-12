@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { DollarSign } from 'lucide-react';
 import api from '../../lib/api';
+import { formatFechaCorta } from '../../lib/dateUtils';
 import { Badge, Card, EmptyState, SkeletonCard } from '../../components/ui';
 
 function mesLargoEs(ym) {
@@ -29,12 +30,7 @@ function formatMonto(m) {
 }
 
 function formatFechaPago(iso) {
-  if (!iso) return '';
-  return new Date(iso).toLocaleString('es-ES', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  });
+  return formatFechaCorta(iso) || '';
 }
 
 export default function KaratecaMensualidadesPage() {

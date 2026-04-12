@@ -3,18 +3,8 @@ import { Link } from 'react-router-dom';
 import { CalendarCheck, DollarSign, Shield } from 'lucide-react';
 import api from '../../lib/api';
 import { KyuBadge } from '../../lib/kyuUtils';
+import { formatFecha } from '../../lib/dateUtils';
 import { Badge, Button, Card, Input, Modal, SkeletonCard } from '../../components/ui';
-
-/* ── pure helpers (logic unchanged) ─────────────────────────── */
-
-function formatFecha(iso) {
-  if (!iso) return '—';
-  return new Date(iso).toLocaleDateString('es-ES', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  });
-}
 
 function pad2(n) {
   return String(n).padStart(2, '0');

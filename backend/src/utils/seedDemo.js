@@ -118,27 +118,56 @@ async function main() {
     },
   });
 
+  // Recuperar id de Sofía's karateca record (necesario para mensualidades y asistencias)
+  const sofiaKarateca = await prisma.karateca.findUnique({ where: { userId: sofiaUser.id } });
+
   // ─── 4. MENSUALIDADES ──────────────────────────────────────────────────────
 
-  // Andrés: 2025-01 → 2025-04
+  // Andrés: 2025-01 → 2026-04
   await prisma.mensualidad.createMany({
     data: [
       { karatecaId: andres.id, mes: '2025-01', monto: 80000, pagado: true,  fechaPago: new Date('2025-01-05') },
       { karatecaId: andres.id, mes: '2025-02', monto: 80000, pagado: true,  fechaPago: new Date('2025-02-04') },
       { karatecaId: andres.id, mes: '2025-03', monto: 80000, pagado: true,  fechaPago: new Date('2025-03-06') },
-      { karatecaId: andres.id, mes: '2025-04', monto: 80000, pagado: false, fechaPago: null },
+      { karatecaId: andres.id, mes: '2025-04', monto: 80000, pagado: true,  fechaPago: new Date('2026-04-04') },
+      { karatecaId: andres.id, mes: '2025-05', monto: 80000, pagado: true,  fechaPago: new Date('2025-05-05') },
+      { karatecaId: andres.id, mes: '2025-06', monto: 80000, pagado: true,  fechaPago: new Date('2025-06-04') },
+      { karatecaId: andres.id, mes: '2025-07', monto: 80000, pagado: true,  fechaPago: new Date('2025-07-07') },
+      { karatecaId: andres.id, mes: '2025-08', monto: 80000, pagado: true,  fechaPago: new Date('2025-08-05') },
+      { karatecaId: andres.id, mes: '2025-09', monto: 80000, pagado: true,  fechaPago: new Date('2025-09-04') },
+      { karatecaId: andres.id, mes: '2025-10', monto: 80000, pagado: true,  fechaPago: new Date('2025-10-06') },
+      { karatecaId: andres.id, mes: '2025-11', monto: 80000, pagado: true,  fechaPago: new Date('2025-11-05') },
+      { karatecaId: andres.id, mes: '2025-12', monto: 80000, pagado: true,  fechaPago: new Date('2025-12-04') },
+      { karatecaId: andres.id, mes: '2026-01', monto: 80000, pagado: true,  fechaPago: new Date('2026-01-06') },
+      { karatecaId: andres.id, mes: '2026-02', monto: 80000, pagado: true,  fechaPago: new Date('2026-02-04') },
+      { karatecaId: andres.id, mes: '2026-03', monto: 80000, pagado: true,  fechaPago: new Date('2026-03-05') },
+      { karatecaId: andres.id, mes: '2026-04', monto: 80000, pagado: true,  fechaPago: new Date('2026-04-04') },
     ],
   });
 
-  // Laura: 2025-03 → 2025-04
+  // Laura: 2025-03 → 2026-04
   await prisma.mensualidad.createMany({
     data: [
       { karatecaId: laura.id, mes: '2025-03', monto: 80000, pagado: true,  fechaPago: new Date('2025-03-10') },
-      { karatecaId: laura.id, mes: '2025-04', monto: 80000, pagado: false, fechaPago: null },
+      { karatecaId: laura.id, mes: '2025-04', monto: 80000, pagado: true,  fechaPago: new Date('2025-04-08') },
+      { karatecaId: laura.id, mes: '2025-05', monto: 80000, pagado: true,  fechaPago: new Date('2025-05-07') },
+      { karatecaId: laura.id, mes: '2025-06', monto: 80000, pagado: true,  fechaPago: new Date('2025-06-06') },
+      { karatecaId: laura.id, mes: '2025-07', monto: 80000, pagado: true,  fechaPago: new Date('2025-07-08') },
+      { karatecaId: laura.id, mes: '2025-08', monto: 80000, pagado: true,  fechaPago: new Date('2025-08-07') },
+      { karatecaId: laura.id, mes: '2025-09', monto: 80000, pagado: true,  fechaPago: new Date('2025-09-05') },
+      { karatecaId: laura.id, mes: '2025-10', monto: 80000, pagado: true,  fechaPago: new Date('2025-10-08') },
+      { karatecaId: laura.id, mes: '2025-11', monto: 80000, pagado: true,  fechaPago: new Date('2025-11-06') },
+      { karatecaId: laura.id, mes: '2025-12', monto: 80000, pagado: true,  fechaPago: new Date('2025-12-05') },
+      { karatecaId: laura.id, mes: '2026-01', monto: 80000, pagado: true,  fechaPago: new Date('2026-01-08') },
+      { karatecaId: laura.id, mes: '2026-02', monto: 80000, pagado: true,  fechaPago: new Date('2026-02-06') },
+      { karatecaId: laura.id, mes: '2026-03', monto: 80000, pagado: true,  fechaPago: new Date('2026-03-07') },
+      { karatecaId: laura.id, mes: '2026-04', monto: 80000, pagado: false, fechaPago: null },
     ],
   });
 
-  // Miguel: 2024-09 → 2025-04
+  // Miguel: 2024-09 → 2026-04
+  // Historial: pagó regular hasta 2025-01, cayó en mora (2025-02/03/04), se puso al día a mediados de 2025,
+  // volvió a caer en mora desde 2026-02.
   await prisma.mensualidad.createMany({
     data: [
       { karatecaId: miguel.id, mes: '2024-09', monto: 80000, pagado: true,  fechaPago: new Date('2024-09-08') },
@@ -149,12 +178,40 @@ async function main() {
       { karatecaId: miguel.id, mes: '2025-02', monto: 80000, pagado: false, fechaPago: null },
       { karatecaId: miguel.id, mes: '2025-03', monto: 80000, pagado: false, fechaPago: null },
       { karatecaId: miguel.id, mes: '2025-04', monto: 80000, pagado: false, fechaPago: null },
+      { karatecaId: miguel.id, mes: '2025-05', monto: 80000, pagado: true,  fechaPago: new Date('2025-06-10') },
+      { karatecaId: miguel.id, mes: '2025-06', monto: 80000, pagado: true,  fechaPago: new Date('2025-06-15') },
+      { karatecaId: miguel.id, mes: '2025-07', monto: 80000, pagado: true,  fechaPago: new Date('2025-07-12') },
+      { karatecaId: miguel.id, mes: '2025-08', monto: 80000, pagado: true,  fechaPago: new Date('2025-08-11') },
+      { karatecaId: miguel.id, mes: '2025-09', monto: 80000, pagado: true,  fechaPago: new Date('2025-09-09') },
+      { karatecaId: miguel.id, mes: '2025-10', monto: 80000, pagado: true,  fechaPago: new Date('2025-10-10') },
+      { karatecaId: miguel.id, mes: '2025-11', monto: 80000, pagado: true,  fechaPago: new Date('2025-11-08') },
+      { karatecaId: miguel.id, mes: '2025-12', monto: 80000, pagado: true,  fechaPago: new Date('2025-12-10') },
+      { karatecaId: miguel.id, mes: '2026-01', monto: 80000, pagado: true,  fechaPago: new Date('2026-01-14') },
+      { karatecaId: miguel.id, mes: '2026-02', monto: 80000, pagado: false, fechaPago: null },
+      { karatecaId: miguel.id, mes: '2026-03', monto: 80000, pagado: false, fechaPago: null },
+      { karatecaId: miguel.id, mes: '2026-04', monto: 80000, pagado: false, fechaPago: null },
     ],
   });
 
-  // Sofía: sin mensualidades (inicio futuro 2025-06)
+  // Sofía: 2025-06 → 2026-04 (inicio que era futuro, ahora activo)
+  await prisma.mensualidad.createMany({
+    data: [
+      { karatecaId: sofiaKarateca.id, mes: '2025-06', monto: 80000, pagado: true,  fechaPago: new Date('2025-06-03') },
+      { karatecaId: sofiaKarateca.id, mes: '2025-07', monto: 80000, pagado: true,  fechaPago: new Date('2025-07-04') },
+      { karatecaId: sofiaKarateca.id, mes: '2025-08', monto: 80000, pagado: true,  fechaPago: new Date('2025-08-05') },
+      { karatecaId: sofiaKarateca.id, mes: '2025-09', monto: 80000, pagado: true,  fechaPago: new Date('2025-09-03') },
+      { karatecaId: sofiaKarateca.id, mes: '2025-10', monto: 80000, pagado: true,  fechaPago: new Date('2025-10-06') },
+      { karatecaId: sofiaKarateca.id, mes: '2025-11', monto: 80000, pagado: true,  fechaPago: new Date('2025-11-04') },
+      { karatecaId: sofiaKarateca.id, mes: '2025-12', monto: 80000, pagado: true,  fechaPago: new Date('2025-12-03') },
+      { karatecaId: sofiaKarateca.id, mes: '2026-01', monto: 80000, pagado: true,  fechaPago: new Date('2026-01-07') },
+      { karatecaId: sofiaKarateca.id, mes: '2026-02', monto: 80000, pagado: true,  fechaPago: new Date('2026-02-05') },
+      { karatecaId: sofiaKarateca.id, mes: '2026-03', monto: 80000, pagado: true,  fechaPago: new Date('2026-03-04') },
+      { karatecaId: sofiaKarateca.id, mes: '2026-04', monto: 80000, pagado: false, fechaPago: null },
+    ],
+  });
 
   // ─── 5. ASISTENCIAS ────────────────────────────────────────────────────────
+  // sofiaKarateca ya fue recuperado arriba para las mensualidades.
   const classDates = [
     new Date('2025-04-01'),
     new Date('2025-03-25'),
@@ -189,8 +246,6 @@ async function main() {
     );
   }
 
-  // Recuperar id de Sofía's karateca record
-  const sofiaKarateca = await prisma.karateca.findUnique({ where: { userId: sofiaUser.id } });
   for (const fecha of classDates) {
     const key = fecha.toISOString().slice(0, 10);
     asistenciaData.push({
@@ -210,15 +265,15 @@ async function main() {
         karatecaId: andres.id,
         aseguradora: 'Sura',
         numeroPoliza: 'POL-001',
-        fechaInicio: new Date('2025-01-01'),
-        fechaVencimiento: new Date('2025-12-31'),
+        fechaInicio: new Date('2026-01-01'),
+        fechaVencimiento: new Date('2026-12-31'),
       },
       {
         karatecaId: laura.id,
         aseguradora: 'Colmena',
         numeroPoliza: 'POL-002',
-        fechaInicio: new Date('2024-06-01'),
-        fechaVencimiento: new Date('2025-04-20'),
+        fechaInicio: new Date('2025-06-01'),
+        fechaVencimiento: new Date('2026-04-25'),
       },
       {
         karatecaId: miguel.id,

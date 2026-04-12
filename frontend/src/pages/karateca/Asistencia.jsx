@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { CalendarCheck } from 'lucide-react';
 import api from '../../lib/api';
 import useAuthStore from '../../store/authStore';
+import { parseLocalDate } from '../../lib/dateUtils';
 import { Card, EmptyState, SkeletonCard } from '../../components/ui';
 
 function ymd(iso) {
@@ -217,7 +218,7 @@ export default function KaratecaAsistenciaPage() {
                     >
                       <span className="text-base">{a.presente ? '✅' : '❌'}</span>
                       <span className="text-white/70">
-                        {new Date(a.fecha).toLocaleDateString('es-ES', {
+                        {parseLocalDate(a.fecha).toLocaleDateString('es-ES', {
                           weekday: 'short',
                           day: 'numeric',
                           month: 'short',
