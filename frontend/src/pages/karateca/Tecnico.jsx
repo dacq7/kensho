@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import api from '../../lib/api';
 import { KyuBadge } from '../../lib/kyuUtils';
-
-const DOJO = { negro: '#111111', rojo: '#CC0000', dorado: '#C9A84C' };
+import { Badge, Card, SkeletonCard } from '../../components/ui';
 
 const KYU_TECNICO = {
   '8kyu': {
@@ -218,16 +217,6 @@ const PINTA_HEREDA_DE = {
   'pinta_3kyu': '3kyu',
 };
 
-const checkboxStyle = {
-  width: '1rem',
-  height: '1rem',
-  borderRadius: 4,
-  border: `2px solid ${DOJO.dorado}`,
-  flexShrink: 0,
-  marginTop: '0.15rem',
-  background: 'transparent',
-};
-
 export default function KaratecaTecnicoPage() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -260,127 +249,106 @@ export default function KaratecaTecnicoPage() {
 
   if (loading) {
     return (
-      <div style={{ padding: '1.5rem', background: DOJO.negro, color: '#aaa', minHeight: '100%' }}>
-        Cargando…
+      <div className="min-h-full p-3 md:p-6 lg:p-8">
+        <div className="mx-auto max-w-[42rem]">
+          <SkeletonCard />
+        </div>
       </div>
     );
   }
 
   if (error || !data) {
     return (
-      <div style={{ padding: '1.5rem', background: DOJO.negro, color: '#f88', minHeight: '100%' }}>
-        {error || 'Sin datos'}
+      <div className="min-h-full p-3 md:p-6 lg:p-8">
+        <div className="rounded-r-md border-l-4 border-dojo-rojo bg-dojo-rojo/10 px-4 py-3 text-sm text-red-200" role="alert">
+          {error || 'Sin datos'}
+        </div>
       </div>
     );
   }
 
   return (
-    <div
-      className="mx-auto w-full max-w-[42rem] p-3 md:p-6 lg:p-8"
-      style={{ minHeight: '100%', background: DOJO.negro, color: '#eee' }}
-    >
-      <h1 className="mb-4 text-lg font-semibold md:text-xl lg:text-2xl" style={{ color: DOJO.dorado }}>
+    <div className="mx-auto w-full max-w-[42rem] min-h-full p-3 md:p-6 lg:p-8">
+      <h1 className="mb-4 text-lg font-semibold tracking-tight text-dojo-dorado md:text-xl lg:text-2xl">
         Contenido técnico
       </h1>
 
-      {/* Sección 1 — Header */}
-      <section
-        className="mb-6 flex flex-col gap-3 border-b pb-5 md:mb-8"
-        style={{ borderColor: DOJO.dorado }}
-      >
+      {/* ── Header ── */}
+      <Card className="mb-6 border-dojo-dorado/25 md:mb-8">
         <div className="flex flex-wrap items-center gap-2 md:gap-3">
           <KyuBadge kyu={kyuActual} />
           {siguienteColor && (
             <>
-              <span style={{ color: DOJO.dorado, fontSize: '1.25rem', fontWeight: 700 }} aria-hidden>
-                →
-              </span>
+              <span className="text-xl font-bold text-dojo-dorado" aria-hidden>→</span>
               <KyuBadge kyu={siguienteColor} />
             </>
           )}
         </div>
         {preExamen && (
-          <div
-            style={{
-              display: 'inline-block',
-              background: `linear-gradient(135deg, ${DOJO.dorado}22, ${DOJO.dorado}44)`,
-              border: `1px solid ${DOJO.dorado}`,
-              color: DOJO.dorado,
-              padding: '0.4rem 0.85rem',
-              borderRadius: 999,
-              fontSize: '0.88rem',
-              fontWeight: 800,
-            }}
-          >
-            ⭐ Autorizado para examen
+          <div className="mt-3">
+            <Badge variant="gold">⭐ Autorizado para examen</Badge>
           </div>
         )}
-      </section>
+      </Card>
 
       {!contenido ? (
-        <p style={{ color: '#aaa', fontSize: '0.95rem' }}>
+        <p className="text-sm text-white/50">
           No hay programa de kyu cargado para tu grado actual. Consulta al Sensei.
         </p>
       ) : (
         <>
-          {/* Sección 2 — Kata */}
-          <section className="mb-6 md:mb-8">
-            <h2 className="mb-3 text-base font-bold md:text-lg" style={{ color: DOJO.dorado }}>
+          {/* ── Kata ── */}
+          <Card className="mb-4 md:mb-5">
+            <h2 className="mb-3 text-base font-bold text-dojo-dorado md:text-lg">
               Kata para el ascenso
             </h2>
-            <ul style={{ margin: 0, paddingLeft: '1.1rem', color: '#e8e8e8', lineHeight: 1.65 }}>
+            <ul className="m-0 list-none p-0 pl-1 text-white/85" style={{ lineHeight: 1.65 }}>
               {contenido.kata.map((k) => (
-                <li key={k} style={{ marginBottom: '0.35rem' }}>
-                  <span style={{ marginRight: '0.35rem' }} aria-hidden>
-                    📖
-                  </span>
+                <li key={k} className="mb-1.5">
+                  <span className="mr-1.5" aria-hidden>📖</span>
                   {k}
                 </li>
               ))}
             </ul>
-          </section>
+          </Card>
 
-          {/* Sección 3 — Kumite */}
-          <section className="mb-6 md:mb-8">
-            <h2 className="mb-3 text-base font-bold md:text-lg" style={{ color: DOJO.dorado }}>
+          {/* ── Kumite ── */}
+          <Card className="mb-4 md:mb-5">
+            <h2 className="mb-3 text-base font-bold text-dojo-dorado md:text-lg">
               Kumite requerido
             </h2>
-            <ul style={{ margin: 0, paddingLeft: '1.1rem', color: '#e8e8e8', lineHeight: 1.65 }}>
+            <ul className="m-0 list-none p-0 pl-1 text-white/85" style={{ lineHeight: 1.65 }}>
               {contenido.kumite.map((k) => (
-                <li key={k} style={{ marginBottom: '0.35rem' }}>
-                  <span style={{ marginRight: '0.35rem' }} aria-hidden>
-                    ⚔️
-                  </span>
+                <li key={k} className="mb-1.5">
+                  <span className="mr-1.5" aria-hidden>⚔️</span>
                   {k}
                 </li>
               ))}
             </ul>
-          </section>
+          </Card>
 
-          {/* Sección 4 — Kihon */}
-          <section className="flex min-h-0 flex-col">
-            <h2 className="mb-3 text-base font-bold md:text-lg" style={{ color: DOJO.dorado }}>
+          {/* ── Kihon ── */}
+          <Card className="flex min-h-0 flex-col">
+            <h2 className="mb-3 text-base font-bold text-dojo-dorado md:text-lg">
               Kihon a preparar
             </h2>
             <ol
-              className="max-h-[min(70vh,28rem)] overflow-y-auto pr-1 md:max-h-none md:overflow-visible"
-              style={{
-                margin: 0,
-                paddingLeft: '1.35rem',
-                color: '#e8e8e8',
-                lineHeight: 1.55,
-              }}
+              className="m-0 max-h-[min(70vh,28rem)] overflow-y-auto pl-5 pr-1 text-white/85 md:max-h-none md:overflow-visible"
+              style={{ lineHeight: 1.55 }}
             >
               {contenido.kihon.map((line, idx) => (
-                <li key={`${idx}-${line.slice(0, 24)}`} style={{ marginBottom: '0.55rem' }}>
-                  <span style={{ display: 'flex', gap: '0.55rem', alignItems: 'flex-start' }}>
-                    <span style={checkboxStyle} title="" aria-hidden />
+                <li key={`${idx}-${line.slice(0, 24)}`} className="mb-2.5">
+                  <span className="flex items-start gap-2.5">
+                    <span
+                      className="mt-0.5 h-4 w-4 shrink-0 rounded border-2 border-dojo-dorado/50 bg-transparent"
+                      aria-hidden
+                    />
                     <span>{line}</span>
                   </span>
                 </li>
               ))}
             </ol>
-          </section>
+          </Card>
         </>
       )}
     </div>

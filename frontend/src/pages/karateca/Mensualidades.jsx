@@ -1,9 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { DollarSign } from 'lucide-react';
 import api from '../../lib/api';
-import { EmptyState } from '../../components/ui';
-
-const DOJO = { negro: '#111111', rojo: '#CC0000', dorado: '#C9A84C' };
+import { Badge, Card, EmptyState, SkeletonCard } from '../../components/ui';
 
 function mesLargoEs(ym) {
   const [y, m] = ym.split('-').map(Number);
@@ -97,78 +95,45 @@ export default function KaratecaMensualidadesPage() {
 
   if (loading) {
     return (
-      <div style={{ padding: '1.5rem', background: DOJO.negro, color: '#aaa', minHeight: '100%' }}>
-        Cargando…
+      <div className="min-h-full p-3 md:p-6 lg:p-8">
+        <div className="mx-auto grid max-w-[36rem] grid-cols-1 gap-4 sm:grid-cols-2">
+          <SkeletonCard />
+          <SkeletonCard />
+        </div>
       </div>
     );
   }
 
   return (
-    <div
-      className="mx-auto w-full max-w-[36rem] p-3 md:p-6 lg:p-8"
-      style={{ minHeight: '100%', background: DOJO.negro, color: '#eee' }}
-    >
-      <h1 className="mb-4 text-lg font-semibold md:text-xl lg:text-2xl" style={{ color: DOJO.dorado }}>
+    <div className="mx-auto w-full max-w-[36rem] min-h-full p-3 md:p-6 lg:p-8">
+      <h1 className="mb-4 text-lg font-semibold tracking-tight text-dojo-dorado md:text-xl lg:text-2xl">
         Mensualidades
       </h1>
 
       {error && (
-        <div style={{ color: '#f88', marginBottom: '1rem', fontSize: '0.9rem' }}>{error}</div>
+        <div className="mb-4 rounded-r-md border-l-4 border-dojo-rojo bg-dojo-rojo/10 px-4 py-3 text-sm text-red-200" role="alert">
+          {error}
+        </div>
       )}
 
-      <section className="mb-6 md:mb-8">
-        <h2 className="mb-3 text-sm font-semibold md:text-base" style={{ color: DOJO.dorado }}>
-          Resumen
-        </h2>
+      {/* ── Resumen ── */}
+      <Card className="mb-6 md:mb-8">
+        <h2 className="mb-3 text-sm font-semibold text-dojo-dorado md:text-base">Resumen</h2>
         <div className="mb-4 flex flex-wrap gap-2">
-          <span
-            style={{
-              background: '#1a4d2e',
-              color: '#b8f5c8',
-              padding: '0.4rem 0.75rem',
-              borderRadius: 8,
-              fontSize: '0.85rem',
-              fontWeight: 700,
-            }}
-          >
-            {resumen.alDia} meses al día
-          </span>
-          <span
-            style={{
-              background: '#7a4b00',
-              color: '#ffe9a0',
-              padding: '0.4rem 0.75rem',
-              borderRadius: 8,
-              fontSize: '0.85rem',
-              fontWeight: 700,
-            }}
-          >
-            {resumen.enMoraCount} meses en mora
-          </span>
-          <span
-            style={{
-              background: 'rgba(204,0,0,0.35)',
-              color: '#ffc8c8',
-              padding: '0.4rem 0.75rem',
-              borderRadius: 8,
-              fontSize: '0.85rem',
-              fontWeight: 700,
-            }}
-          >
-            {resumen.sinPagar} meses sin pagar
-          </span>
+          <Badge variant="success">{resumen.alDia} meses al día</Badge>
+          <Badge variant="warning">{resumen.enMoraCount} meses en mora</Badge>
+          <Badge variant="danger">{resumen.sinPagar} meses sin pagar</Badge>
         </div>
         {resumen.pendienteTotal > 0 && (
-          <p style={{ margin: 0, color: DOJO.rojo, fontWeight: 800, fontSize: '1rem' }}>
+          <p className="m-0 text-lg font-bold text-dojo-rojo">
             Monto total pendiente: ${formatMonto(resumen.pendienteTotal)}
           </p>
         )}
-      </section>
+      </Card>
 
+      {/* ── Historial ── */}
       <section className="flex flex-col gap-3">
-        <h2 className="text-sm font-semibold md:text-base" style={{ color: DOJO.dorado }}>
-          Historial
-        </h2>
+        <h2 className="text-sm font-semibold text-dojo-dorado md:text-base">Historial</h2>
         {items.length === 0 ? (
           <EmptyState
             icon={DollarSign}
@@ -176,76 +141,35 @@ export default function KaratecaMensualidadesPage() {
             description="No hay pagos registrados para este período"
           />
         ) : (
-          <ul className="space-y-3 lg:space-y-0" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+          <ul className="m-0 list-none space-y-3 p-0 lg:space-y-0">
             {items.map((row) => {
               const mora = enMora(row.mes, row.pagado);
               let badge;
               if (row.pagado) {
                 badge = (
-                  <span
-                    style={{
-                      display: 'inline-block',
-                      background: '#1a4d2e',
-                      color: '#b8f5c8',
-                      padding: '0.25rem 0.55rem',
-                      borderRadius: 999,
-                      fontSize: '0.78rem',
-                      fontWeight: 700,
-                    }}
-                  >
-                    ✓ Pagado
+                  <span className="inline-flex items-center gap-1">
+                    <Badge variant="success">✓ Pagado</Badge>
                     {row.fechaPago && (
-                      <span style={{ fontWeight: 500, opacity: 0.95 }}>
-                        {' '}
-                        · {formatFechaPago(row.fechaPago)}
-                      </span>
+                      <span className="text-xs text-white/50">{formatFechaPago(row.fechaPago)}</span>
                     )}
                   </span>
                 );
               } else if (mora) {
-                badge = (
-                  <span
-                    style={{
-                      display: 'inline-block',
-                      background: '#7a4b00',
-                      color: '#ffe9a0',
-                      padding: '0.25rem 0.55rem',
-                      borderRadius: 999,
-                      fontSize: '0.78rem',
-                      fontWeight: 700,
-                    }}
-                  >
-                    ⚠ En mora
-                  </span>
-                );
+                badge = <Badge variant="warning">⚠ En mora</Badge>;
               } else {
-                badge = (
-                  <span
-                    style={{
-                      display: 'inline-block',
-                      background: 'rgba(204,0,0,0.35)',
-                      color: '#ffc8c8',
-                      padding: '0.25rem 0.55rem',
-                      borderRadius: 999,
-                      fontSize: '0.78rem',
-                      fontWeight: 700,
-                    }}
-                  >
-                    ✗ Pendiente
-                  </span>
-                );
+                badge = <Badge variant="danger">✗ Pendiente</Badge>;
               }
 
               return (
                 <li
                   key={row.id}
-                  className="flex flex-col gap-3 rounded-lg border border-[#C9A84C]/25 bg-[#141414] p-4 text-sm md:text-base lg:flex-row lg:items-center lg:justify-between lg:rounded-none lg:border-0 lg:border-b lg:border-[#C9A84C]/25 lg:bg-transparent lg:p-0 lg:pb-4"
+                  className="flex flex-col gap-3 rounded-lg border border-dojo-dorado/25 bg-dojo-surface p-4 text-sm md:text-base lg:flex-row lg:items-center lg:justify-between lg:rounded-none lg:border-0 lg:border-b lg:border-dojo-dorado/25 lg:bg-transparent lg:p-0 lg:pb-4"
                 >
                   <div className="min-w-0 sm:min-w-[10rem]">
                     <div className="mb-2 font-bold text-white">{mesLargoEs(row.mes)}</div>
                     {badge}
                   </div>
-                  <div className="text-lg font-bold lg:text-base" style={{ color: DOJO.dorado }}>
+                  <div className="text-lg font-bold text-dojo-dorado lg:text-base">
                     ${formatMonto(row.monto)}
                   </div>
                 </li>

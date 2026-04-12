@@ -2,8 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Pencil, Trash2 } from 'lucide-react';
 import api from '../../lib/api';
 import { KyuBadge } from '../../lib/kyuUtils';
-
-const DOJO = { negro: '#111111', rojo: '#CC0000', dorado: '#C9A84C' };
+import { Badge, Button, Card, Input, Modal, Skeleton, SkeletonCard } from '../../components/ui';
 
 function gradoValue(row) {
   if (typeof row.dan === 'number' && row.dan >= 1) return `${row.dan}dan`;
@@ -24,11 +23,11 @@ function formatFecha(iso) {
   });
 }
 
-function badgeEstado(estado) {
-  if (estado === 'activa') return { label: 'Activa', bg: '#1a4d2e', color: '#9af7b8' };
-  if (estado === 'por_vencer') return { label: '⚠ Por vencer', bg: '#7a4b00', color: '#ffd08a' };
-  if (estado === 'vencida') return { label: 'Vencida', bg: 'rgba(204,0,0,0.35)', color: '#ffaaaa' };
-  return { label: 'Sin póliza', bg: '#444', color: '#ddd' };
+function polizaEstadoBadge(estado) {
+  if (estado === 'activa') return { variant: 'success', label: 'Activa' };
+  if (estado === 'por_vencer') return { variant: 'warning', label: '⚠ Por vencer' };
+  if (estado === 'vencida') return { variant: 'danger', label: 'Vencida' };
+  return { variant: 'muted', label: 'Sin póliza' };
 }
 
 export default function SenseiPolizasPage() {
@@ -219,39 +218,58 @@ export default function SenseiPolizasPage() {
     await loadHistory(row.karatecaId);
   };
 
-  const cardStyle = {
-    flex: '1 1 180px',
-    borderRadius: 8,
-    padding: '0.85rem 1rem',
-    border: `1px solid ${DOJO.dorado}`,
-    background: '#1a1a1a',
-  };
-
   const modalVisible = Boolean(createTarget || editTarget);
 
   return (
-    <div className="p-3 text-[#eee] md:p-6 lg:p-8" style={{ minHeight: '100%', background: DOJO.negro }}>
-      <header className="mb-4 border-b pb-3 md:mb-5 md:pb-4" style={{ borderColor: DOJO.dorado }}>
-        <h1 className="text-lg font-semibold md:text-xl lg:text-2xl" style={{ margin: 0, color: DOJO.dorado }}>
+    <div className="min-h-full p-3 text-white/90 md:p-6 lg:p-8">
+      {/* ── Header ── */}
+      <header className="mb-4 border-b border-dojo-dorado/25 pb-3 md:mb-5 md:pb-4">
+        <h1 className="text-lg font-semibold tracking-tight text-dojo-dorado md:text-xl lg:text-2xl">
           Pólizas
         </h1>
       </header>
 
-      <section style={{ display: 'flex', flexWrap: 'wrap', gap: '0.9rem', marginBottom: '1.2rem' }}>
-        <article style={cardStyle}><div style={{ fontSize: '0.75rem', color: '#999' }}>Activas</div><div style={{ fontSize: '1.5rem', color: '#9af7b8', fontWeight: 700 }}>{resumen.activas}</div></article>
-        <article style={cardStyle}><div style={{ fontSize: '0.75rem', color: '#999' }}>Por vencer (30 días)</div><div style={{ fontSize: '1.5rem', color: '#ffd08a', fontWeight: 700 }}>{resumen.porVencer}</div></article>
-        <article style={cardStyle}><div style={{ fontSize: '0.75rem', color: '#999' }}>Vencidas</div><div style={{ fontSize: '1.5rem', color: '#ffaaaa', fontWeight: 700 }}>{resumen.vencidas}</div></article>
-      </section>
+      {/* ── Resumen stat cards ── */}
+      <div className="mb-5 flex flex-wrap gap-4">
+        <Card className="flex-1 basis-40">
+          <p className="text-xs uppercase tracking-wider text-white/40">Activas</p>
+          <p className="mt-1 text-2xl font-bold text-emerald-400">{resumen.activas}</p>
+        </Card>
+        <Card className="flex-1 basis-40">
+          <p className="text-xs uppercase tracking-wider text-white/40">Por vencer (30 días)</p>
+          <p className="mt-1 text-2xl font-bold text-amber-400">{resumen.porVencer}</p>
+        </Card>
+        <Card className="flex-1 basis-40">
+          <p className="text-xs uppercase tracking-wider text-white/40">Vencidas</p>
+          <p className="mt-1 text-2xl font-bold text-red-400">{resumen.vencidas}</p>
+        </Card>
+      </div>
 
-      {error && <div style={{ background: 'rgba(204,0,0,0.2)', border: `1px solid ${DOJO.rojo}`, color: '#ffd0d0', padding: '0.65rem 1rem', borderRadius: 6, marginBottom: '1rem' }}>{error}</div>}
-      {success && <div style={{ background: 'rgba(201,168,76,0.12)', border: `1px solid ${DOJO.dorado}`, color: DOJO.dorado, padding: '0.65rem 1rem', borderRadius: 6, marginBottom: '1rem' }}>{success}</div>}
+      {/* ── Alerts ── */}
+      {error && (
+        <div className="mb-4 rounded-r-md border-l-4 border-dojo-rojo bg-dojo-rojo/10 px-4 py-3 text-sm text-red-200" role="alert">
+          {error}
+        </div>
+      )}
+      {success && (
+        <div className="mb-4 rounded-r-md border-l-4 border-dojo-dorado bg-dojo-dorado/10 px-4 py-3 text-sm text-dojo-dorado" role="status">
+          {success}
+        </div>
+      )}
 
-      <section style={{ background: '#1a1a1a', border: `1px solid ${DOJO.dorado}`, borderRadius: 8, padding: '1rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem', gap: '0.75rem', flexWrap: 'wrap' }}>
-          <h2 style={{ margin: 0, fontSize: '1rem', color: DOJO.dorado }}>Karatecas y pólizas</h2>
-          <label style={{ display: 'flex', gap: '0.45rem', alignItems: 'center' }}>
-            <span style={{ fontSize: '0.8rem', color: '#bbb' }}>Filtrar estado</span>
-            <select value={filtroEstado} onChange={(e) => setFiltroEstado(e.target.value)} style={{ background: '#0f0f0f', color: '#eee', border: `1px solid ${DOJO.rojo}`, borderRadius: 6, padding: '0.35rem 0.45rem', fontSize: '0.85rem' }}>
+      {/* ── Table section ── */}
+      <Card>
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-sm font-semibold text-dojo-dorado md:text-base">
+            Karatecas y pólizas
+          </h2>
+          <label className="flex items-center gap-2">
+            <span className="text-xs text-white/50">Filtrar estado</span>
+            <select
+              value={filtroEstado}
+              onChange={(e) => setFiltroEstado(e.target.value)}
+              className="rounded-md border border-white/15 bg-dojo-negro px-3 py-2 text-sm text-white focus:border-dojo-dorado focus:outline-none"
+            >
               <option value="todos">Todos</option>
               <option value="activa">Activas</option>
               <option value="por_vencer">Por vencer</option>
@@ -262,167 +280,126 @@ export default function SenseiPolizasPage() {
         </div>
 
         {loading ? (
-          <p style={{ color: '#888' }}>Cargando…</p>
+          <div className="space-y-3 py-2">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-4/5" />
+          </div>
         ) : (
           <>
+            {/* Mobile cards */}
             <div className="space-y-3 lg:hidden">
               {filteredRows.map((row) => {
-                const b = badgeEstado(row.estado);
+                const { variant, label } = polizaEstadoBadge(row.estado);
                 return (
                   <div
                     key={row.karatecaId}
-                    className="rounded-lg border border-[#C9A84C]/25 bg-[#141414] p-4"
+                    className="rounded-lg border border-dojo-dorado/20 bg-dojo-negro p-4"
                   >
                     <button
                       type="button"
                       onClick={() => openHistory(row)}
-                      className="mb-2 min-h-[44px] w-full text-left font-bold"
-                      style={{ background: 'transparent', border: 'none', color: DOJO.dorado }}
+                      className="mb-2 min-h-[44px] w-full cursor-pointer border-0 bg-transparent p-0 text-left font-bold text-dojo-dorado"
                     >
                       {row.user?.nombre ?? `#${row.karatecaId}`}
                     </button>
                     <div className="mb-2">
                       <KyuBadge kyu={gradoValue(row)} />
                     </div>
-                    <p className="mb-1 text-sm text-[#ddd]">{row.poliza?.aseguradora || '—'}</p>
-                    <p className="mb-2 text-xs text-[#aaa]">
+                    <p className="mb-1 text-sm text-white/75">{row.poliza?.aseguradora || '—'}</p>
+                    <p className="mb-2 text-xs text-white/45">
                       {formatFecha(row.poliza?.fechaInicio)} → {formatFecha(row.poliza?.fechaVencimiento)}
                     </p>
-                    <span
-                      className="mb-3 inline-block rounded-full px-2 py-0.5 text-xs font-semibold"
-                      style={{ background: b.bg, color: b.color }}
-                    >
-                      {b.label}
-                    </span>
+                    <div className="mb-3">
+                      <Badge variant={variant}>{label}</Badge>
+                    </div>
                     <div className="flex flex-col gap-2">
-                      <button
+                      <Button
                         type="button"
+                        variant="primary"
+                        size="sm"
+                        className="w-full"
                         onClick={() => openCreate(row)}
-                        className="min-h-[44px] w-full rounded-md border-0 font-semibold text-white"
-                        style={{ background: DOJO.rojo, fontSize: '0.85rem' }}
                       >
                         Registrar / Actualizar póliza
-                      </button>
+                      </Button>
                       {row.poliza?.id && (
-                        <button
+                        <Button
                           type="button"
-                          onClick={() => removeByKarateca(row)}
+                          variant="ghost"
+                          size="sm"
+                          className="w-full text-red-400 hover:text-red-300"
                           disabled={deletingId === `k-${row.karatecaId}`}
-                          className="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-md border border-[#8a1f1f] font-medium text-[#ffb0b0]"
-                          style={{
-                            background: 'rgba(204,0,0,0.25)',
-                            cursor: deletingId === `k-${row.karatecaId}` ? 'not-allowed' : 'pointer',
-                            opacity: deletingId === `k-${row.karatecaId}` ? 0.6 : 1,
-                          }}
+                          onClick={() => removeByKarateca(row)}
                         >
-                          <Trash2 size={16} />
+                          <Trash2 className="h-4 w-4" aria-hidden />
                           Quitar póliza
-                        </button>
+                        </Button>
                       )}
                     </div>
                   </div>
                 );
               })}
             </div>
+
+            {/* Desktop table */}
             <div className="hidden overflow-x-auto lg:block">
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.88rem' }}>
-              <thead>
-                <tr style={{ borderBottom: `2px solid ${DOJO.dorado}`, color: DOJO.dorado, textAlign: 'left' }}>
-                  <th style={{ padding: '0.5rem' }}>Nombre</th><th style={{ padding: '0.5rem' }}>Kyu</th><th style={{ padding: '0.5rem' }}>Aseguradora</th><th style={{ padding: '0.5rem' }}>N° Póliza</th><th style={{ padding: '0.5rem' }}>Fecha inicio</th><th style={{ padding: '0.5rem' }}>Fecha vencimiento</th><th style={{ padding: '0.5rem' }}>Estado</th><th style={{ padding: '0.5rem' }}>Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredRows.map((row) => {
-                  const b = badgeEstado(row.estado);
-                  return (
-                    <tr key={row.karatecaId} style={{ borderBottom: '1px solid #333' }}>
-                      <td style={{ padding: '0.55rem 0.5rem', fontWeight: 600 }}>
-                        <button type="button" onClick={() => openHistory(row)} style={{ background: 'transparent', border: 'none', color: DOJO.dorado, cursor: 'pointer', padding: 0, fontWeight: 700 }}>{row.user?.nombre ?? `#${row.karatecaId}`}</button>
-                      </td>
-                      <td style={{ padding: '0.55rem 0.5rem' }}><KyuBadge kyu={gradoValue(row)} /></td>
-                      <td style={{ padding: '0.55rem 0.5rem', color: '#ddd' }}>{row.poliza?.aseguradora || '—'}</td>
-                      <td style={{ padding: '0.55rem 0.5rem', color: '#ddd' }}>{row.poliza?.numeroPoliza || '—'}</td>
-                      <td style={{ padding: '0.55rem 0.5rem', color: '#ccc' }}>{formatFecha(row.poliza?.fechaInicio)}</td>
-                      <td style={{ padding: '0.55rem 0.5rem', color: '#ccc' }}>{formatFecha(row.poliza?.fechaVencimiento)}</td>
-                      <td style={{ padding: '0.55rem 0.5rem' }}><span style={{ background: b.bg, color: b.color, padding: '0.2rem 0.5rem', borderRadius: 999, fontSize: '0.74rem', fontWeight: 600 }}>{b.label}</span></td>
-                      <td style={{ padding: '0.55rem 0.5rem' }}>
-                        <div style={{ display: 'flex', gap: '0.45rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                          <button type="button" onClick={() => openCreate(row)} style={{ border: 'none', borderRadius: 6, background: DOJO.rojo, color: '#fff', padding: '0.35rem 0.65rem', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}>
-                            Registrar / Actualizar póliza
-                          </button>
-                          {row.poliza?.id && (
-                            <button type="button" onClick={() => removeByKarateca(row)} disabled={deletingId === `k-${row.karatecaId}`} title="Quitar póliza" style={{ border: '1px solid #8a1f1f', borderRadius: 6, background: 'rgba(204,0,0,0.25)', color: '#ffb0b0', padding: '0.28rem 0.45rem', cursor: deletingId === `k-${row.karatecaId}` ? 'not-allowed' : 'pointer', opacity: deletingId === `k-${row.karatecaId}` ? 0.6 : 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                              <Trash2 size={14} />
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-            </div>
-          </>
-        )}
-      </section>
-
-      {modalVisible && (
-        <div
-          role="presentation"
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 p-0 md:p-4"
-          onClick={closeModal}
-        >
-          <div
-            role="dialog"
-            aria-labelledby="modal-poliza-title"
-            onClick={(e) => e.stopPropagation()}
-            className="h-full max-h-[100dvh] w-full overflow-y-auto rounded-none border-0 p-4 md:h-auto md:max-h-[90vh] md:max-w-[26rem] md:rounded-[10px] md:border-2 md:p-[1.1rem]"
-            style={{ background: DOJO.negro, borderColor: DOJO.dorado }}
-          >
-            <h3 id="modal-poliza-title" style={{ margin: '0 0 0.75rem', color: DOJO.dorado, fontSize: '1.05rem' }}>{editTarget ? 'Editar póliza' : 'Registrar nueva póliza'}</h3>
-            <p style={{ margin: '0 0 1rem', color: '#aaa', fontSize: '0.85rem' }}>{editTarget ? 'Editando ítem del historial' : (createTarget?.user?.nombre ?? '')}</p>
-            <label style={{ display: 'block', marginBottom: '0.7rem' }}><span style={{ display: 'block', fontSize: '0.8rem', color: '#bbb', marginBottom: '0.25rem' }}>Aseguradora</span><input type="text" value={aseguradora} onChange={(e) => setAseguradora(e.target.value)} style={{ width: '100%', boxSizing: 'border-box', padding: '0.45rem', borderRadius: 6, border: `1px solid ${DOJO.rojo}`, background: '#0f0f0f', color: '#fff' }} /></label>
-            <label style={{ display: 'block', marginBottom: '0.7rem' }}><span style={{ display: 'block', fontSize: '0.8rem', color: '#bbb', marginBottom: '0.25rem' }}>Número de póliza</span><input type="text" value={numeroPoliza} onChange={(e) => setNumeroPoliza(e.target.value)} style={{ width: '100%', boxSizing: 'border-box', padding: '0.45rem', borderRadius: 6, border: `1px solid ${DOJO.rojo}`, background: '#0f0f0f', color: '#fff' }} /></label>
-            <label style={{ display: 'block', marginBottom: '0.7rem' }}><span style={{ display: 'block', fontSize: '0.8rem', color: '#bbb', marginBottom: '0.25rem' }}>Fecha inicio</span><input type="date" value={fechaInicio} onChange={(e) => setFechaInicio(e.target.value)} style={{ width: '100%', boxSizing: 'border-box', padding: '0.45rem', borderRadius: 6, border: `1px solid ${DOJO.rojo}`, background: '#0f0f0f', color: '#fff' }} /></label>
-            <label style={{ display: 'block', marginBottom: '1rem' }}><span style={{ display: 'block', fontSize: '0.8rem', color: '#bbb', marginBottom: '0.25rem' }}>Fecha vencimiento</span><input type="date" value={fechaVencimiento} onChange={(e) => setFechaVencimiento(e.target.value)} style={{ width: '100%', boxSizing: 'border-box', padding: '0.45rem', borderRadius: 6, border: `1px solid ${DOJO.rojo}`, background: '#0f0f0f', color: '#fff' }} /></label>
-            <div className="flex flex-col gap-2 sm:flex-row sm:justify-end sm:gap-2">
-              <button type="button" onClick={closeModal} disabled={savingModal} className="min-h-[44px] w-full rounded-md border border-[#555] bg-transparent px-4 text-[#ccc] sm:w-auto" style={{ cursor: savingModal ? 'not-allowed' : 'pointer' }}>Cancelar</button>
-              <button type="button" onClick={saveForm} disabled={savingModal} className="min-h-[44px] w-full rounded-md border-0 px-4 font-bold text-white sm:w-auto" style={{ background: DOJO.rojo, cursor: savingModal ? 'not-allowed' : 'pointer', opacity: savingModal ? 0.7 : 1 }}>{savingModal ? 'Guardando…' : (editTarget ? 'Actualizar' : 'Guardar')}</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {historyOpen && (
-        <div role="presentation" className="fixed inset-0 z-[55] bg-black/60" onClick={() => setHistoryOpen(false)}>
-          <aside
-            role="dialog"
-            onClick={(e) => e.stopPropagation()}
-            className="absolute right-0 top-0 h-full w-full overflow-auto border-l-2 border-[#C9A84C] p-4 md:max-w-[680px]"
-            style={{ background: '#171717' }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}>
-              <h3 style={{ margin: 0, color: DOJO.dorado }}>Historial de pólizas — {historyKarateca?.user?.nombre}</h3>
-              <button type="button" onClick={() => setHistoryOpen(false)} className="min-h-[44px] min-w-[44px] cursor-pointer rounded-md border border-[#555] bg-transparent px-3 text-[#ccc]">Cerrar</button>
-            </div>
-            {historyLoading ? <p style={{ color: '#888' }}>Cargando historial…</p> : (
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
-                <thead><tr style={{ borderBottom: `2px solid ${DOJO.dorado}`, color: DOJO.dorado, textAlign: 'left' }}><th style={{ padding: '0.45rem' }}>Aseguradora</th><th style={{ padding: '0.45rem' }}>N° Póliza</th><th style={{ padding: '0.45rem' }}>Fecha inicio</th><th style={{ padding: '0.45rem' }}>Fecha vencimiento</th><th style={{ padding: '0.45rem' }}>Estado</th><th style={{ padding: '0.45rem' }}>Acciones</th></tr></thead>
+              <table className="w-full border-collapse text-sm">
+                <thead>
+                  <tr className="border-b-2 border-dojo-dorado">
+                    {['Nombre', 'Kyu', 'Aseguradora', 'N° Póliza', 'Fecha inicio', 'Fecha vencimiento', 'Estado', 'Acciones'].map((h) => (
+                      <th key={h} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-dojo-dorado/70">
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
                 <tbody>
-                  {historyRows.map((item) => {
-                    const b = badgeEstado(item.estado);
+                  {filteredRows.map((row) => {
+                    const { variant, label } = polizaEstadoBadge(row.estado);
                     return (
-                      <tr key={item.id} style={{ borderBottom: '1px solid #333' }}>
-                        <td style={{ padding: '0.45rem' }}>{item.aseguradora}</td>
-                        <td style={{ padding: '0.45rem' }}>{item.numeroPoliza}</td>
-                        <td style={{ padding: '0.45rem' }}>{formatFecha(item.fechaInicio)}</td>
-                        <td style={{ padding: '0.45rem' }}>{formatFecha(item.fechaVencimiento)}</td>
-                        <td style={{ padding: '0.45rem' }}><span style={{ background: b.bg, color: b.color, padding: '0.2rem 0.45rem', borderRadius: 999, fontSize: '0.72rem', fontWeight: 600 }}>{b.label}</span></td>
-                        <td style={{ padding: '0.45rem' }}>
-                          <div style={{ display: 'flex', gap: '0.35rem' }}>
-                            <button type="button" onClick={() => openEdit(item)} style={{ border: '1px solid #666', borderRadius: 6, background: '#262626', color: '#ddd', padding: '0.25rem 0.5rem', cursor: 'pointer' }}><Pencil size={13} /></button>
-                            <button type="button" onClick={() => removeSingle(item)} disabled={deletingId === `p-${item.id}`} style={{ border: '1px solid #8a1f1f', borderRadius: 6, background: 'rgba(204,0,0,0.25)', color: '#ffb0b0', padding: '0.25rem 0.5rem', cursor: deletingId === `p-${item.id}` ? 'not-allowed' : 'pointer' }}><Trash2 size={13} /></button>
+                      <tr key={row.karatecaId} className="border-b border-white/5 transition-colors hover:bg-white/[0.02]">
+                        <td className="px-4 py-3 font-semibold">
+                          <button
+                            type="button"
+                            onClick={() => openHistory(row)}
+                            className="cursor-pointer border-0 bg-transparent p-0 font-bold text-dojo-dorado hover:text-dojo-dorado/80"
+                          >
+                            {row.user?.nombre ?? `#${row.karatecaId}`}
+                          </button>
+                        </td>
+                        <td className="px-4 py-3">
+                          <KyuBadge kyu={gradoValue(row)} />
+                        </td>
+                        <td className="px-4 py-3 text-white/75">{row.poliza?.aseguradora || '—'}</td>
+                        <td className="px-4 py-3 text-white/75">{row.poliza?.numeroPoliza || '—'}</td>
+                        <td className="px-4 py-3 text-white/60">{formatFecha(row.poliza?.fechaInicio)}</td>
+                        <td className="px-4 py-3 text-white/60">{formatFecha(row.poliza?.fechaVencimiento)}</td>
+                        <td className="px-4 py-3">
+                          <Badge variant={variant}>{label}</Badge>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <Button
+                              type="button"
+                              variant="primary"
+                              size="sm"
+                              onClick={() => openCreate(row)}
+                            >
+                              Registrar / Actualizar póliza
+                            </Button>
+                            {row.poliza?.id && (
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                disabled={deletingId === `k-${row.karatecaId}`}
+                                title="Quitar póliza"
+                                onClick={() => removeByKarateca(row)}
+                              >
+                                <Trash2 className="h-4 w-4 text-red-400" aria-hidden />
+                              </Button>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -430,6 +407,158 @@ export default function SenseiPolizasPage() {
                   })}
                 </tbody>
               </table>
+            </div>
+          </>
+        )}
+      </Card>
+
+      {/* ── Modal: Registrar / Editar póliza ── */}
+      <Modal
+        open={modalVisible}
+        onClose={closeModal}
+        title={editTarget ? 'Editar póliza' : 'Registrar nueva póliza'}
+      >
+        <p className="mb-4 text-sm text-white/50">
+          {editTarget ? 'Editando ítem del historial' : (createTarget?.user?.nombre ?? '')}
+        </p>
+        <div className="space-y-4">
+          <Input
+            id="pol-aseguradora"
+            label="Aseguradora"
+            type="text"
+            value={aseguradora}
+            onChange={(e) => setAseguradora(e.target.value)}
+          />
+          <Input
+            id="pol-numero"
+            label="Número de póliza"
+            type="text"
+            value={numeroPoliza}
+            onChange={(e) => setNumeroPoliza(e.target.value)}
+          />
+          <Input
+            id="pol-fecha-inicio"
+            label="Fecha inicio"
+            type="date"
+            value={fechaInicio}
+            onChange={(e) => setFechaInicio(e.target.value)}
+          />
+          <Input
+            id="pol-fecha-vencimiento"
+            label="Fecha vencimiento"
+            type="date"
+            value={fechaVencimiento}
+            onChange={(e) => setFechaVencimiento(e.target.value)}
+          />
+        </div>
+        <div className="mt-5 flex justify-end gap-2">
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            disabled={savingModal}
+            onClick={closeModal}
+          >
+            Cancelar
+          </Button>
+          <Button
+            type="button"
+            variant="primary"
+            size="sm"
+            disabled={savingModal}
+            onClick={saveForm}
+          >
+            {savingModal ? 'Guardando…' : (editTarget ? 'Actualizar' : 'Guardar')}
+          </Button>
+        </div>
+      </Modal>
+
+      {/* ── History side panel ── */}
+      {historyOpen && (
+        <div
+          role="presentation"
+          className="fixed inset-0 z-[55] bg-black/60"
+          onClick={() => setHistoryOpen(false)}
+        >
+          <aside
+            role="dialog"
+            aria-label="Historial de pólizas"
+            onClick={(e) => e.stopPropagation()}
+            className="absolute right-0 top-0 h-full w-full overflow-auto border-l-2 border-dojo-dorado bg-dojo-surface p-4 md:max-w-[680px]"
+          >
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <h3 className="text-base font-semibold text-dojo-dorado">
+                Historial de pólizas — {historyKarateca?.user?.nombre}
+              </h3>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => setHistoryOpen(false)}
+              >
+                Cerrar
+              </Button>
+            </div>
+
+            {historyLoading ? (
+              <div className="space-y-3 py-2">
+                <Skeleton className="h-8 w-full" />
+                <Skeleton className="h-8 w-full" />
+                <Skeleton className="h-8 w-3/4" />
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse text-sm">
+                  <thead>
+                    <tr className="border-b-2 border-dojo-dorado">
+                      {['Aseguradora', 'N° Póliza', 'Fecha inicio', 'Fecha vencimiento', 'Estado', 'Acciones'].map((h) => (
+                        <th key={h} className="px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wider text-dojo-dorado/70">
+                          {h}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {historyRows.map((item) => {
+                      const { variant, label } = polizaEstadoBadge(item.estado);
+                      return (
+                        <tr key={item.id} className="border-b border-white/5 transition-colors hover:bg-white/[0.02]">
+                          <td className="px-3 py-2.5 text-white/85">{item.aseguradora}</td>
+                          <td className="px-3 py-2.5 text-white/85">{item.numeroPoliza}</td>
+                          <td className="px-3 py-2.5 text-white/60">{formatFecha(item.fechaInicio)}</td>
+                          <td className="px-3 py-2.5 text-white/60">{formatFecha(item.fechaVencimiento)}</td>
+                          <td className="px-3 py-2.5">
+                            <Badge variant={variant}>{label}</Badge>
+                          </td>
+                          <td className="px-3 py-2.5">
+                            <div className="flex items-center gap-1.5">
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => openEdit(item)}
+                                title="Editar"
+                              >
+                                <Pencil className="h-3.5 w-3.5" aria-hidden />
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                disabled={deletingId === `p-${item.id}`}
+                                onClick={() => removeSingle(item)}
+                                title="Eliminar"
+                              >
+                                <Trash2 className="h-3.5 w-3.5 text-red-400" aria-hidden />
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             )}
           </aside>
         </div>

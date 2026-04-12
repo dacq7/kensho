@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import api from '../../lib/api';
 import useAuthStore from '../../store/authStore';
-
-const DOJO = { negro: '#111111', rojo: '#CC0000', dorado: '#C9A84C' };
+import { Badge, Card, SkeletonCard } from '../../components/ui';
 
 function formatFecha(iso) {
   if (!iso) return '—';
@@ -27,6 +26,18 @@ function labelEstadoTabla(estado) {
   if (estado === 'por_vencer') return 'Por vencer';
   if (estado === 'vencida') return 'Vencida';
   return estado || '—';
+}
+
+function estadoBadgeVariant(estado) {
+  if (estado === 'activa') return 'success';
+  if (estado === 'por_vencer') return 'warning';
+  return 'danger';
+}
+
+function estadoBadgeLabel(estado) {
+  if (estado === 'activa') return '✓ Póliza Activa';
+  if (estado === 'por_vencer') return '⚠ Por vencer';
+  return '✗ Póliza Vencida';
 }
 
 export default function KaratecaPolizaPage() {
@@ -80,131 +91,73 @@ export default function KaratecaPolizaPage() {
 
   if (loading) {
     return (
-      <div style={{ padding: '1.5rem', background: DOJO.negro, color: '#aaa', minHeight: '100%' }}>
-        Cargando…
+      <div className="min-h-full p-3 md:p-6 lg:p-8">
+        <div className="mx-auto max-w-[40rem]">
+          <SkeletonCard />
+        </div>
       </div>
     );
   }
 
   return (
-    <div
-      className="mx-auto w-full max-w-[40rem] p-3 md:p-6 lg:p-8"
-      style={{ minHeight: '100%', background: DOJO.negro, color: '#eee' }}
-    >
-      <h1 className="mb-4 text-lg font-semibold md:text-xl lg:text-2xl" style={{ color: DOJO.dorado }}>
+    <div className="mx-auto w-full max-w-[40rem] min-h-full p-3 md:p-6 lg:p-8">
+      <h1 className="mb-4 text-lg font-semibold tracking-tight text-dojo-dorado md:text-xl lg:text-2xl">
         Mi póliza
       </h1>
 
       {error && (
-        <div style={{ color: '#f88', marginBottom: '1rem', fontSize: '0.9rem' }}>{error}</div>
+        <div className="mb-4 rounded-r-md border-l-4 border-dojo-rojo bg-dojo-rojo/10 px-4 py-3 text-sm text-red-200" role="alert">
+          {error}
+        </div>
       )}
 
       <section className="mb-6 flex flex-col gap-4 md:mb-8">
         {!vigente ? (
-          <div
-            style={{
-              background: 'rgba(204,0,0,0.2)',
-              border: `2px solid ${DOJO.rojo}`,
-              color: '#ffb0b0',
-              padding: '1rem 1.15rem',
-              borderRadius: 10,
-              fontWeight: 800,
-              fontSize: '1.05rem',
-              lineHeight: 1.35,
-            }}
-          >
-            Sin póliza registrada — Contacta al Sensei
+          <div className="rounded-lg border border-dojo-rojo/50 bg-dojo-rojo/10 px-4 py-4">
+            <p className="font-extrabold text-red-300">Sin póliza registrada</p>
+            <p className="mt-1 text-sm text-red-400/80">Contacta al Sensei</p>
+            <div className="mt-3">
+              <Badge variant="danger">Sin cobertura</Badge>
+            </div>
           </div>
         ) : (
-          <div className="flex flex-col gap-3">
-            <div className="text-xl font-extrabold leading-tight text-white md:text-2xl lg:text-[1.65rem]">
+          <Card>
+            <p className="mb-1 text-2xl font-extrabold leading-tight text-white">
               {vigente.aseguradora}
-            </div>
-            <p className="text-sm text-[#ccc] md:text-base">
-              <span style={{ color: '#888' }}>N° Póliza: </span>
-              <span style={{ fontWeight: 700, color: '#eee' }}>{vigente.numeroPoliza}</span>
             </p>
-            <div className="flex flex-col gap-1 text-sm text-[#bbb] md:flex-row md:flex-wrap md:gap-2 md:text-base">
-              <p className="m-0">
-                Inicio:{' '}
-                <strong style={{ color: '#ddd', fontWeight: 600 }}>{formatFecha(vigente.fechaInicio)}</strong>
-              </p>
-              <span className="hidden md:inline" aria-hidden>
-                ·
-              </span>
-              <p className="m-0">
-                Vencimiento:{' '}
-                <strong style={{ color: '#ddd', fontWeight: 600 }}>{formatFecha(vigente.fechaVencimiento)}</strong>
-              </p>
-            </div>
+            <p className="mb-4 text-sm text-white/50">
+              <span className="text-xs uppercase tracking-wider text-white/40">N° Póliza </span>
+              <span className="font-semibold text-white/80">{vigente.numeroPoliza}</span>
+            </p>
+
+            <dl className="mb-4 grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+              <div>
+                <dt className="text-xs uppercase tracking-wider text-white/40">Inicio</dt>
+                <dd className="mt-0.5 font-medium text-white/80">{formatFecha(vigente.fechaInicio)}</dd>
+              </div>
+              <div>
+                <dt className="text-xs uppercase tracking-wider text-white/40">Vencimiento</dt>
+                <dd className="mt-0.5 font-medium text-white/80">{formatFecha(vigente.fechaVencimiento)}</dd>
+              </div>
+            </dl>
 
             {(() => {
               const est = vigente.estado;
               const diff = diasRelativoVencimiento(vigente.fechaVencimiento);
-              let badge;
-              if (est === 'activa') {
-                badge = (
-                  <span
-                    style={{
-                      display: 'inline-block',
-                      background: '#1a4d2e',
-                      color: '#b8f5c8',
-                      padding: '0.5rem 1rem',
-                      borderRadius: 10,
-                      fontSize: '1rem',
-                      fontWeight: 800,
-                    }}
-                  >
-                    ✓ Póliza Activa
-                  </span>
-                );
-              } else if (est === 'por_vencer') {
-                badge = (
-                  <span
-                    style={{
-                      display: 'inline-block',
-                      background: '#7a4b00',
-                      color: '#ffe9a0',
-                      padding: '0.5rem 1rem',
-                      borderRadius: 10,
-                      fontSize: '1rem',
-                      fontWeight: 800,
-                    }}
-                  >
-                    ⚠ Por vencer
-                  </span>
-                );
-              } else {
-                badge = (
-                  <span
-                    style={{
-                      display: 'inline-block',
-                      background: 'rgba(204,0,0,0.35)',
-                      color: '#ffc8c8',
-                      padding: '0.5rem 1rem',
-                      borderRadius: 10,
-                      fontSize: '1rem',
-                      fontWeight: 800,
-                    }}
-                  >
-                    ✗ Póliza Vencida
-                  </span>
-                );
-              }
 
               let diasLine = null;
               if (est === 'vencida') {
                 const vencidos = Math.max(0, -diff);
                 diasLine = (
-                  <p style={{ margin: '0.85rem 0 0', fontSize: '1rem', color: '#f0a0a0', fontWeight: 700 }}>
+                  <p className="mt-3 text-sm font-bold text-red-400">
                     Vencida hace {vencidos} {vencidos === 1 ? 'día' : 'días'}
                   </p>
                 );
               } else {
                 const rest = Math.max(0, diff);
-                const diasColor = est === 'por_vencer' ? '#ffe9a0' : '#c8e8d0';
+                const diasColorClass = est === 'por_vencer' ? 'text-amber-400' : 'text-emerald-400';
                 diasLine = (
-                  <p style={{ margin: '0.85rem 0 0', fontSize: '1rem', color: diasColor, fontWeight: 700 }}>
+                  <p className={`mt-3 text-sm font-bold ${diasColorClass}`}>
                     {rest === 0
                       ? 'Vence hoy'
                       : `${rest} ${rest === 1 ? 'día restante' : 'días restantes'}`}
@@ -214,64 +167,61 @@ export default function KaratecaPolizaPage() {
 
               return (
                 <div>
-                  {badge}
+                  <Badge variant={estadoBadgeVariant(est)} className="text-sm px-3 py-1">
+                    {estadoBadgeLabel(est)}
+                  </Badge>
                   {diasLine}
                 </div>
               );
             })()}
-          </div>
+          </Card>
         )}
       </section>
 
       {historialRows.length > 0 && (
         <section className="flex flex-col gap-4">
-          <h2 className="text-base font-bold md:text-lg" style={{ color: DOJO.dorado }}>
+          <h2 className="text-sm font-semibold text-dojo-dorado md:text-base">
             Historial de pólizas anteriores
           </h2>
+
+          {/* Mobile cards */}
           <div className="space-y-3 lg:hidden">
             {historialRows.map((row) => (
               <div
                 key={row.id}
-                className="rounded-lg border border-[#333] bg-[#141414] p-4 text-sm"
+                className="rounded-lg border border-dojo-dorado/20 bg-dojo-surface p-4 text-sm"
               >
                 <p className="mb-1 font-semibold text-white">{row.aseguradora}</p>
-                <p className="mb-2 text-[#ccc]">N° {row.numeroPoliza}</p>
-                <p className="mb-1 text-xs text-[#aaa]">Inicio: {formatFecha(row.fechaInicio)}</p>
-                <p className="mb-2 text-xs text-[#aaa]">Vencimiento: {formatFecha(row.fechaVencimiento)}</p>
-                <p className="text-[#ddd]">{labelEstadoTabla(row.estado)}</p>
+                <p className="mb-2 text-white/50">N° {row.numeroPoliza}</p>
+                <p className="mb-1 text-xs text-white/40">Inicio: {formatFecha(row.fechaInicio)}</p>
+                <p className="mb-2 text-xs text-white/40">Vencimiento: {formatFecha(row.fechaVencimiento)}</p>
+                <Badge variant={estadoBadgeVariant(row.estado)}>{labelEstadoTabla(row.estado)}</Badge>
               </div>
             ))}
           </div>
+
+          {/* Desktop table */}
           <div className="hidden overflow-x-auto lg:block">
-            <table
-              style={{
-                width: '100%',
-                borderCollapse: 'collapse',
-                fontSize: '0.85rem',
-                color: '#ddd',
-              }}
-            >
+            <table className="w-full border-collapse text-sm">
               <thead>
-                <tr style={{ borderBottom: `2px solid ${DOJO.dorado}`, textAlign: 'left' }}>
-                  <th style={{ padding: '0.5rem 0.4rem', color: DOJO.dorado }}>Aseguradora</th>
-                  <th style={{ padding: '0.5rem 0.4rem', color: DOJO.dorado }}>N° Póliza</th>
-                  <th style={{ padding: '0.5rem 0.4rem', color: DOJO.dorado }}>Fecha inicio</th>
-                  <th style={{ padding: '0.5rem 0.4rem', color: DOJO.dorado }}>Fecha vencimiento</th>
-                  <th style={{ padding: '0.5rem 0.4rem', color: DOJO.dorado }}>Estado</th>
+                <tr className="border-b-2 border-dojo-dorado">
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-dojo-dorado/70">Aseguradora</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-dojo-dorado/70">N° Póliza</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-dojo-dorado/70">Fecha inicio</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-dojo-dorado/70">Fecha vencimiento</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-dojo-dorado/70">Estado</th>
                 </tr>
               </thead>
               <tbody>
                 {historialRows.map((row) => (
-                  <tr key={row.id} style={{ borderBottom: '1px solid #333' }}>
-                    <td style={{ padding: '0.55rem 0.4rem', verticalAlign: 'top' }}>{row.aseguradora}</td>
-                    <td style={{ padding: '0.55rem 0.4rem', verticalAlign: 'top' }}>{row.numeroPoliza}</td>
-                    <td style={{ padding: '0.55rem 0.4rem', color: '#ccc', verticalAlign: 'top' }}>
-                      {formatFecha(row.fechaInicio)}
+                  <tr key={row.id} className="border-b border-white/5 transition-colors hover:bg-white/[0.02]">
+                    <td className="px-4 py-3 align-top text-white/85">{row.aseguradora}</td>
+                    <td className="px-4 py-3 align-top text-white/70">{row.numeroPoliza}</td>
+                    <td className="px-4 py-3 align-top text-white/60">{formatFecha(row.fechaInicio)}</td>
+                    <td className="px-4 py-3 align-top text-white/60">{formatFecha(row.fechaVencimiento)}</td>
+                    <td className="px-4 py-3 align-top">
+                      <Badge variant={estadoBadgeVariant(row.estado)}>{labelEstadoTabla(row.estado)}</Badge>
                     </td>
-                    <td style={{ padding: '0.55rem 0.4rem', color: '#ccc', verticalAlign: 'top' }}>
-                      {formatFecha(row.fechaVencimiento)}
-                    </td>
-                    <td style={{ padding: '0.55rem 0.4rem', verticalAlign: 'top' }}>{labelEstadoTabla(row.estado)}</td>
                   </tr>
                 ))}
               </tbody>

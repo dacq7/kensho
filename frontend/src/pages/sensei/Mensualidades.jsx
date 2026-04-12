@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import api from '../../lib/api';
 import { KyuBadge } from '../../lib/kyuUtils';
+import { Badge, Button, Card, Input, Modal, Skeleton } from '../../components/ui';
 
-const DOJO = { negro: '#111111', rojo: '#CC0000', dorado: '#C9A84C' };
 const CONFIG_CLAVE = 'mensualidad_valor';
 
 function pad2(n) {
@@ -186,126 +187,83 @@ export default function SenseiMensualidadesPage() {
     return { pagados, pendientes, recaudado };
   }, [filas]);
 
-  const badge = (children, bg, color) => (
-    <span
-      style={{
-        display: 'inline-block',
-        background: bg,
-        color,
-        padding: '0.2rem 0.5rem',
-        borderRadius: '999px',
-        fontSize: '0.75rem',
-        fontWeight: 600,
-      }}
-    >
-      {children}
-    </span>
-  );
-
   return (
-    <div className="p-3 text-[#eee] md:p-6 lg:p-8" style={{ minHeight: '100%', background: DOJO.negro }}>
-      {/* Parte 1 — Header */}
-      <header className="mb-4 border-b pb-4 md:mb-5" style={{ borderColor: DOJO.dorado }}>
-        <h1 className="mb-3 text-lg font-semibold md:text-xl lg:text-2xl" style={{ color: DOJO.dorado }}>
+    <div className="min-h-full p-3 text-white/90 md:p-6 lg:p-8">
+      {/* ── Header ── */}
+      <header className="mb-4 border-b border-dojo-dorado/25 pb-4 md:mb-5">
+        <h1 className="mb-3 text-lg font-semibold tracking-tight text-dojo-dorado md:text-xl lg:text-2xl">
           Mensualidades
         </h1>
         <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:gap-4">
-          <label style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-            <span style={{ fontSize: '0.8rem', color: '#aaa' }}>Valor global de la mensualidad</span>
-            <input
-              type="text"
-              inputMode="decimal"
-              value={valorGlobal}
-              onChange={(e) => setValorGlobal(e.target.value)}
-              disabled={configLoading}
-              style={{
-                width: '10rem',
-                padding: '0.45rem 0.6rem',
-                borderRadius: 6,
-                border: `1px solid ${DOJO.rojo}`,
-                background: '#0d0d0d',
-                color: '#fff',
-              }}
-            />
-          </label>
-          <button
+          <Input
+            id="valor-global"
+            label="Valor global de la mensualidad"
+            type="text"
+            inputMode="decimal"
+            value={valorGlobal}
+            onChange={(e) => setValorGlobal(e.target.value)}
+            disabled={configLoading}
+            className="w-40"
+          />
+          <Button
             type="button"
+            variant="primary"
+            size="md"
             onClick={guardarConfig}
             disabled={configSaving || configLoading}
-            className="min-h-[44px] w-full rounded-md border-0 font-bold text-white sm:w-auto sm:px-4"
-            style={{
-              background: DOJO.rojo,
-              cursor: configSaving || configLoading ? 'not-allowed' : 'pointer',
-              opacity: configSaving || configLoading ? 0.6 : 1,
-            }}
           >
             {configSaving ? 'Guardando…' : 'Guardar'}
-          </button>
-          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <button
+          </Button>
+
+          <div className="ml-auto flex items-center gap-2">
+            <Button
               type="button"
+              variant="primary"
+              size="sm"
               aria-label="Mes anterior"
               onClick={() => setMes((m) => addMonthsYm(m, -1))}
-              style={{
-                padding: '0.4rem 0.65rem',
-                borderRadius: 6,
-                border: 'none',
-                background: DOJO.rojo,
-                color: '#fff',
-                fontWeight: 700,
-                cursor: 'pointer',
-              }}
             >
-              ←
-            </button>
-            <span style={{ minWidth: '11rem', textAlign: 'center', textTransform: 'capitalize', color: DOJO.dorado, fontWeight: 600 }}>
+              <ChevronLeft className="h-4 w-4" aria-hidden />
+            </Button>
+            <span className="min-w-[11rem] text-center font-semibold capitalize text-dojo-dorado">
               {mesTituloEs(mes)}
             </span>
-            <button
+            <Button
               type="button"
+              variant="primary"
+              size="sm"
               aria-label="Mes siguiente"
               onClick={() => setMes((m) => addMonthsYm(m, 1))}
-              style={{
-                padding: '0.4rem 0.65rem',
-                borderRadius: 6,
-                border: 'none',
-                background: DOJO.rojo,
-                color: '#fff',
-                fontWeight: 700,
-                cursor: 'pointer',
-              }}
             >
-              →
-            </button>
+              <ChevronRight className="h-4 w-4" aria-hidden />
+            </Button>
           </div>
         </div>
       </header>
 
+      {/* ── Alerts ── */}
       {error && (
-        <div style={{ background: 'rgba(204,0,0,0.2)', border: `1px solid ${DOJO.rojo}`, color: '#fcc', padding: '0.6rem 1rem', borderRadius: 6, marginBottom: '1rem' }}>
+        <div className="mb-4 rounded-r-md border-l-4 border-dojo-rojo bg-dojo-rojo/10 px-4 py-3 text-sm text-red-200" role="alert">
           {error}
         </div>
       )}
       {success && (
-        <div style={{ background: 'rgba(201,168,76,0.12)', border: `1px solid ${DOJO.dorado}`, color: DOJO.dorado, padding: '0.6rem 1rem', borderRadius: 6, marginBottom: '1rem' }}>
+        <div className="mb-4 rounded-r-md border-l-4 border-dojo-dorado bg-dojo-dorado/10 px-4 py-3 text-sm text-dojo-dorado" role="status">
           {success}
         </div>
       )}
 
-      {/* Parte 2 — Cards móvil / Tabla desktop */}
-      <section
-        className="mb-4 md:mb-5"
-        style={{
-          background: '#1a1a1a',
-          border: `1px solid ${DOJO.dorado}`,
-          borderRadius: 8,
-          padding: '1rem',
-        }}
-      >
+      {/* ── Table / Cards section ── */}
+      <Card className="mb-4 md:mb-5">
         {listaLoading ? (
-          <p style={{ color: '#888', margin: 0 }}>Cargando…</p>
+          <div className="space-y-3 py-2">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-4/5" />
+          </div>
         ) : (
           <>
+            {/* Mobile cards */}
             <div className="space-y-3 lg:hidden">
               {filas.map((row) => {
                 const pagado = row.mensualidad?.pagado === true;
@@ -313,7 +271,7 @@ export default function SenseiMensualidadesPage() {
                 return (
                   <div
                     key={row.karatecaId}
-                    className="rounded-lg border border-[#333] bg-[#141414] p-4"
+                    className="rounded-lg border border-dojo-dorado/20 bg-dojo-negro p-4"
                   >
                     <div className="mb-2 font-semibold text-white">
                       {row.user?.nombre ?? `#${row.karatecaId}`}
@@ -323,265 +281,209 @@ export default function SenseiMensualidadesPage() {
                     </div>
                     <div className="mb-2 flex flex-wrap gap-2">
                       {pagado
-                        ? badge('✓ Pagado', '#1a4d2e', '#9f9')
-                        : badge('✗ Pendiente', 'rgba(204,0,0,0.35)', '#faa')}
-                      {enMora && badge('⚠ En mora', '#b35900', '#fff')}
+                        ? <Badge variant="success">✓ Pagado</Badge>
+                        : <Badge variant="danger">✗ Pendiente</Badge>}
+                      {enMora && <Badge variant="warning">⚠ En mora</Badge>}
                     </div>
-                    <p className="mb-1 text-sm text-[#ccc]">Monto: {row.mensualidad?.monto ?? '—'}</p>
-                    <p className="mb-3 text-xs text-[#888]">{formatFechaPago(row.mensualidad?.fechaPago)}</p>
+                    <p className="mb-1 text-sm text-white/70">
+                      Monto: {row.mensualidad?.monto ?? '—'}
+                    </p>
+                    <p className="mb-3 text-xs text-white/40">
+                      {formatFechaPago(row.mensualidad?.fechaPago)}
+                    </p>
                     {!pagado ? (
-                      <button
+                      <Button
                         type="button"
+                        variant="primary"
+                        size="sm"
+                        className="w-full"
                         onClick={() => abrirModalPago(row)}
-                        className="min-h-[44px] w-full rounded-md border-0 font-semibold text-white"
-                        style={{ background: DOJO.rojo, fontSize: '0.85rem' }}
                       >
                         Registrar pago
-                      </button>
+                      </Button>
                     ) : (
-                      <button
+                      <Button
                         type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="w-full text-red-400 hover:text-red-300"
                         onClick={() => setAnularId(row.mensualidad.id)}
-                        className="min-h-[44px] w-full rounded-md border-0 font-semibold"
-                        style={{ background: '#333', color: '#f99', fontSize: '0.85rem' }}
                       >
                         Anular pago
-                      </button>
+                      </Button>
                     )}
                   </div>
                 );
               })}
             </div>
+
+            {/* Desktop table */}
             <div className="hidden overflow-x-auto lg:block">
-            <table className="w-full min-w-[640px] border-collapse text-sm" style={{ fontSize: '0.9rem' }}>
-              <thead>
-                <tr style={{ borderBottom: `2px solid ${DOJO.dorado}`, color: DOJO.dorado, textAlign: 'left' }}>
-                  <th style={{ padding: '0.5rem' }}>Nombre</th>
-                  <th style={{ padding: '0.5rem' }}>Kyu</th>
-                  <th style={{ padding: '0.5rem' }}>Estado</th>
-                  <th style={{ padding: '0.5rem' }}>Monto</th>
-                  <th style={{ padding: '0.5rem' }}>Fecha de pago</th>
-                  <th style={{ padding: '0.5rem' }}>Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filas.map((row) => {
-                  const pagado = row.mensualidad?.pagado === true;
-                  const enMora = row.enMora === true && !pagado;
-                  return (
-                    <tr key={row.karatecaId} style={{ borderBottom: '1px solid #333' }}>
-                      <td style={{ padding: '0.55rem 0.5rem', fontWeight: 600 }}>{row.user?.nombre ?? `#${row.karatecaId}`}</td>
-                      <td style={{ padding: '0.55rem 0.5rem' }}>
-                        <KyuBadge kyu={gradoValue(row)} />
-                      </td>
-                      <td style={{ padding: '0.55rem 0.5rem' }}>
-                        <span style={{ display: 'inline-flex', flexWrap: 'wrap', gap: '0.35rem', alignItems: 'center' }}>
-                          {pagado
-                            ? badge('✓ Pagado', '#1a4d2e', '#9f9')
-                            : badge('✗ Pendiente', 'rgba(204,0,0,0.35)', '#faa')}
-                          {enMora && badge('⚠ En mora', '#b35900', '#fff')}
-                        </span>
-                      </td>
-                      <td style={{ padding: '0.55rem 0.5rem', color: '#ccc' }}>{row.mensualidad?.monto ?? '—'}</td>
-                      <td style={{ padding: '0.55rem 0.5rem', color: '#ccc' }}>{formatFechaPago(row.mensualidad?.fechaPago)}</td>
-                      <td style={{ padding: '0.55rem 0.5rem' }}>
-                        {!pagado ? (
-                          <button
-                            type="button"
-                            onClick={() => abrirModalPago(row)}
-                            style={{
-                              padding: '0.35rem 0.65rem',
-                              borderRadius: 6,
-                              border: 'none',
-                              background: DOJO.rojo,
-                              color: '#fff',
-                              fontWeight: 600,
-                              fontSize: '0.8rem',
-                              cursor: 'pointer',
-                            }}
-                          >
-                            Registrar pago
-                          </button>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => setAnularId(row.mensualidad.id)}
-                            style={{
-                              padding: '0.35rem 0.65rem',
-                              borderRadius: 6,
-                              border: 'none',
-                              background: '#333',
-                              color: '#f99',
-                              fontWeight: 600,
-                              fontSize: '0.8rem',
-                              cursor: 'pointer',
-                            }}
-                          >
-                            Anular pago
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+              <table className="w-full min-w-[640px] border-collapse text-sm">
+                <thead>
+                  <tr className="border-b-2 border-dojo-dorado">
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-dojo-dorado/70">Nombre</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-dojo-dorado/70">Kyu</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-dojo-dorado/70">Estado</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-dojo-dorado/70">Monto</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-dojo-dorado/70">Fecha de pago</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-dojo-dorado/70">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filas.map((row) => {
+                    const pagado = row.mensualidad?.pagado === true;
+                    const enMora = row.enMora === true && !pagado;
+                    return (
+                      <tr key={row.karatecaId} className="border-b border-white/5 transition-colors hover:bg-white/[0.02]">
+                        <td className="px-4 py-3 font-semibold text-white/90">
+                          {row.user?.nombre ?? `#${row.karatecaId}`}
+                        </td>
+                        <td className="px-4 py-3">
+                          <KyuBadge kyu={gradoValue(row)} />
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            {pagado
+                              ? <Badge variant="success">✓ Pagado</Badge>
+                              : <Badge variant="danger">✗ Pendiente</Badge>}
+                            {enMora && <Badge variant="warning">⚠ En mora</Badge>}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-white/70">
+                          {row.mensualidad?.monto ?? '—'}
+                        </td>
+                        <td className="px-4 py-3 text-white/70">
+                          {formatFechaPago(row.mensualidad?.fechaPago)}
+                        </td>
+                        <td className="px-4 py-3">
+                          {!pagado ? (
+                            <Button
+                              type="button"
+                              variant="primary"
+                              size="sm"
+                              onClick={() => abrirModalPago(row)}
+                            >
+                              Registrar pago
+                            </Button>
+                          ) : (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="text-red-400 hover:text-red-300"
+                              onClick={() => setAnularId(row.mensualidad.id)}
+                            >
+                              Anular pago
+                            </Button>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           </>
         )}
-      </section>
+      </Card>
 
-      {/* Parte 3 — Resumen */}
-      <section
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: '1.25rem',
-          background: '#1a1a1a',
-          border: `1px solid ${DOJO.dorado}`,
-          borderRadius: 8,
-          padding: '1rem 1.25rem',
-        }}
-      >
-        <div>
-          <div style={{ fontSize: '0.75rem', color: '#999' }}>Total pagados</div>
-          <div style={{ fontSize: '1.25rem', fontWeight: 700, color: DOJO.dorado }}>{resumen.pagados}</div>
-        </div>
-        <div>
-          <div style={{ fontSize: '0.75rem', color: '#999' }}>Total pendientes</div>
-          <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#faa' }}>{resumen.pendientes}</div>
-        </div>
-        <div>
-          <div style={{ fontSize: '0.75rem', color: '#999' }}>Total recaudado</div>
-          <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#9f9' }}>
+      {/* ── Resumen ── */}
+      <div className="flex flex-wrap gap-4">
+        <Card className="flex-1 basis-40">
+          <p className="text-xs uppercase tracking-wider text-white/40">Total pagados</p>
+          <p className="mt-1 text-2xl font-bold text-dojo-dorado">{resumen.pagados}</p>
+        </Card>
+        <Card className="flex-1 basis-40">
+          <p className="text-xs uppercase tracking-wider text-white/40">Total pendientes</p>
+          <p className="mt-1 text-2xl font-bold text-red-400">{resumen.pendientes}</p>
+        </Card>
+        <Card className="flex-1 basis-40">
+          <p className="text-xs uppercase tracking-wider text-white/40">Total recaudado</p>
+          <p className="mt-1 text-2xl font-bold text-emerald-400">
             {resumen.recaudado.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-          </div>
-        </div>
-      </section>
+          </p>
+        </Card>
+      </div>
 
-      {/* Modal registrar pago */}
-      {modalRow && (
-        <div
-          role="presentation"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 p-0 md:p-4"
-          onClick={cerrarModal}
-        >
-          <div
-            role="dialog"
-            aria-labelledby="modal-pago-title"
-            className="h-full max-h-[100dvh] w-full overflow-y-auto rounded-none border-0 p-4 md:h-auto md:max-h-[90vh] md:max-w-[22rem] md:rounded-[10px] md:border-2 md:p-[1.25rem]"
-            style={{ background: DOJO.negro, borderColor: DOJO.dorado }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2 id="modal-pago-title" style={{ margin: '0 0 1rem', fontSize: '1.1rem', color: DOJO.dorado }}>
-              Registrar pago
-            </h2>
-            <p style={{ margin: '0 0 1rem', fontSize: '0.85rem', color: '#aaa' }}>
-              {modalRow.user?.nombre ?? `Karateca #${modalRow.karatecaId}`}
-            </p>
-            <label style={{ display: 'block', marginBottom: '0.75rem' }}>
-              <span style={{ display: 'block', fontSize: '0.8rem', color: '#aaa', marginBottom: '0.25rem' }}>Monto</span>
-              <input
-                type="text"
-                inputMode="decimal"
-                value={modalMonto}
-                onChange={(e) => setModalMonto(e.target.value)}
-                style={{
-                  width: '100%',
-                  boxSizing: 'border-box',
-                  padding: '0.45rem',
-                  borderRadius: 6,
-                  border: `1px solid ${DOJO.rojo}`,
-                  background: '#0d0d0d',
-                  color: '#fff',
-                }}
-              />
-            </label>
-            <label style={{ display: 'block', marginBottom: '1rem' }}>
-              <span style={{ display: 'block', fontSize: '0.8rem', color: '#aaa', marginBottom: '0.25rem' }}>Fecha de pago</span>
-              <input
-                type="date"
-                value={modalFecha}
-                onChange={(e) => setModalFecha(e.target.value)}
-                style={{
-                  width: '100%',
-                  boxSizing: 'border-box',
-                  padding: '0.45rem',
-                  borderRadius: 6,
-                  border: `1px solid ${DOJO.rojo}`,
-                  background: '#0d0d0d',
-                  color: '#fff',
-                }}
-              />
-            </label>
-            <div className="flex flex-col gap-2 sm:flex-row sm:justify-end sm:gap-2">
-              <button
-                type="button"
-                onClick={cerrarModal}
-                disabled={modalSubmitting}
-                className="min-h-[44px] w-full rounded-md border border-[#555] bg-transparent px-4 text-[#ccc] sm:w-auto"
-                style={{ cursor: modalSubmitting ? 'not-allowed' : 'pointer' }}
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                onClick={confirmarPago}
-                disabled={modalSubmitting}
-                className="min-h-[44px] w-full rounded-md border-0 bg-[#CC0000] px-4 font-bold text-white sm:w-auto"
-                style={{
-                  background: DOJO.rojo,
-                  cursor: modalSubmitting ? 'not-allowed' : 'pointer',
-                  opacity: modalSubmitting ? 0.7 : 1,
-                }}
-              >
-                {modalSubmitting ? 'Guardando…' : 'Confirmar'}
-              </button>
-            </div>
-          </div>
+      {/* ── Modal: Registrar pago ── */}
+      <Modal
+        open={Boolean(modalRow)}
+        onClose={cerrarModal}
+        title="Registrar pago"
+      >
+        <p className="mb-4 text-sm text-white/50">
+          {modalRow?.user?.nombre ?? `Karateca #${modalRow?.karatecaId}`}
+        </p>
+        <div className="space-y-4">
+          <Input
+            id="modal-monto"
+            label="Monto"
+            type="text"
+            inputMode="decimal"
+            value={modalMonto}
+            onChange={(e) => setModalMonto(e.target.value)}
+          />
+          <Input
+            id="modal-fecha-pago"
+            label="Fecha de pago"
+            type="date"
+            value={modalFecha}
+            onChange={(e) => setModalFecha(e.target.value)}
+          />
         </div>
-      )}
+        <div className="mt-5 flex justify-end gap-2">
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            disabled={modalSubmitting}
+            onClick={cerrarModal}
+          >
+            Cancelar
+          </Button>
+          <Button
+            type="button"
+            variant="primary"
+            size="sm"
+            disabled={modalSubmitting}
+            onClick={confirmarPago}
+          >
+            {modalSubmitting ? 'Guardando…' : 'Confirmar'}
+          </Button>
+        </div>
+      </Modal>
 
-      {/* Confirmación anular */}
-      {anularId != null && (
-        <div
-          role="presentation"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 p-0 md:p-4"
-          onClick={() => !anularSubmitting && setAnularId(null)}
-        >
-          <div
-            role="dialog"
-            className="h-full max-h-[100dvh] w-full overflow-y-auto rounded-none border-0 p-4 md:h-auto md:max-w-[20rem] md:rounded-[10px] md:border-2 md:p-[1.25rem]"
-            style={{ background: DOJO.negro, borderColor: DOJO.rojo }}
-            onClick={(e) => e.stopPropagation()}
+      {/* ── Modal: Confirmar anular ── */}
+      <Modal
+        open={anularId != null}
+        onClose={() => { if (!anularSubmitting) setAnularId(null); }}
+        title="¿Anular pago?"
+      >
+        <p className="mb-5 text-sm text-white/70">
+          La mensualidad quedará marcada como pendiente.
+        </p>
+        <div className="flex justify-end gap-2">
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            disabled={anularSubmitting}
+            onClick={() => setAnularId(null)}
           >
-            <p style={{ margin: '0 0 1rem', color: '#eee' }}>¿Anular este pago? La mensualidad quedará pendiente.</p>
-            <div className="flex flex-col gap-2 sm:flex-row sm:justify-end sm:gap-2">
-              <button
-                type="button"
-                onClick={() => setAnularId(null)}
-                disabled={anularSubmitting}
-                className="min-h-[44px] w-full rounded-md border border-[#555] bg-transparent px-4 text-[#ccc] sm:w-auto"
-                style={{ cursor: anularSubmitting ? 'not-allowed' : 'pointer' }}
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                onClick={confirmarAnular}
-                disabled={anularSubmitting}
-                className="min-h-[44px] w-full rounded-md border-0 px-4 font-bold text-white sm:w-auto"
-                style={{
-                  background: DOJO.rojo,
-                  cursor: anularSubmitting ? 'not-allowed' : 'pointer',
-                }}
-              >
-                {anularSubmitting ? '…' : 'Anular'}
-              </button>
-            </div>
-          </div>
+            Cancelar
+          </Button>
+          <Button
+            type="button"
+            variant="primary"
+            size="sm"
+            disabled={anularSubmitting}
+            onClick={confirmarAnular}
+          >
+            {anularSubmitting ? '…' : 'Anular'}
+          </Button>
         </div>
-      )}
+      </Modal>
     </div>
   );
 }

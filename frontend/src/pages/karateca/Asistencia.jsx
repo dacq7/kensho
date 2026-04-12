@@ -2,9 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { CalendarCheck } from 'lucide-react';
 import api from '../../lib/api';
 import useAuthStore from '../../store/authStore';
-import { EmptyState } from '../../components/ui';
-
-const DOJO = { negro: '#111111', rojo: '#CC0000', dorado: '#C9A84C' };
+import { Card, EmptyState, SkeletonCard } from '../../components/ui';
 
 function ymd(iso) {
   const d = new Date(iso);
@@ -21,10 +19,22 @@ function ymFromYmd(ymdStr) {
   return ymdStr.slice(0, 7);
 }
 
-function colorPct(p) {
-  if (p >= 80) return '#6ecf7a';
-  if (p >= 50) return '#e6c84c';
-  return '#e85c5c';
+function colorPctText(p) {
+  if (p >= 80) return 'text-emerald-400';
+  if (p >= 50) return 'text-amber-400';
+  return 'text-red-400';
+}
+
+function colorPctBg(p) {
+  if (p >= 80) return 'bg-emerald-400';
+  if (p >= 50) return 'bg-amber-400';
+  return 'bg-red-400';
+}
+
+function colorPctBadge(p) {
+  if (p >= 80) return 'bg-emerald-400/20 text-emerald-400';
+  if (p >= 50) return 'bg-amber-400/20 text-amber-400';
+  return 'bg-red-400/20 text-red-400';
 }
 
 function pctMes(asistenciasMes) {
@@ -105,81 +115,69 @@ export default function KaratecaAsistenciaPage() {
   const promedio = resumen?.promedio ?? 0;
   const totalClases = resumen?.totalClases ?? 0;
   const clasesAsistidas = resumen?.clasesAsistidas ?? 0;
-  const col = colorPct(promedio);
 
   if (loading) {
     return (
-      <div style={{ padding: '1.5rem', background: DOJO.negro, color: '#aaa', minHeight: '100%' }}>
-        Cargando…
+      <div className="min-h-full p-3 md:p-6 lg:p-8">
+        <div className="mx-auto grid max-w-[40rem] grid-cols-1 gap-4 sm:grid-cols-2">
+          <SkeletonCard />
+          <SkeletonCard />
+        </div>
       </div>
     );
   }
 
   if (error && karatecaId == null) {
     return (
-      <div style={{ padding: '1.5rem', background: DOJO.negro, color: '#f88', minHeight: '100%' }}>
-        {error}
+      <div className="min-h-full p-3 md:p-6 lg:p-8">
+        <div className="rounded-r-md border-l-4 border-dojo-rojo bg-dojo-rojo/10 px-4 py-3 text-sm text-red-200" role="alert">
+          {error}
+        </div>
       </div>
     );
   }
 
   return (
-    <div
-      className="mx-auto w-full max-w-[40rem] p-3 md:p-6 lg:p-8"
-      style={{ minHeight: '100%', background: DOJO.negro, color: '#eee' }}
-    >
-      <h1 className="mb-4 text-lg font-semibold md:text-xl lg:text-2xl" style={{ color: DOJO.dorado }}>
+    <div className="mx-auto w-full max-w-[40rem] min-h-full p-3 md:p-6 lg:p-8">
+      <h1 className="mb-4 text-lg font-semibold tracking-tight text-dojo-dorado md:text-xl lg:text-2xl">
         Asistencia
       </h1>
 
       {error && (
-        <div style={{ color: '#f88', marginBottom: '1rem', fontSize: '0.9rem' }}>{error}</div>
+        <div className="mb-4 rounded-r-md border-l-4 border-dojo-rojo bg-dojo-rojo/10 px-4 py-3 text-sm text-red-200" role="alert">
+          {error}
+        </div>
       )}
 
-      <section className="mb-6 md:mb-8">
-        <h2 className="mb-2 text-sm font-semibold text-[#aaa] md:text-base">
-          Resumen
-        </h2>
-        <div style={{ fontSize: '2.6rem', fontWeight: 900, color: col, lineHeight: 1 }}>{promedio}%</div>
-        <p style={{ margin: '0.4rem 0 0.85rem', color: '#aaa', fontSize: '0.9rem' }}>
+      {/* ── Resumen ── */}
+      <Card className="mb-6 md:mb-8">
+        <h2 className="mb-3 text-sm font-semibold text-dojo-dorado md:text-base">Resumen</h2>
+        <p className={`text-5xl font-black leading-none ${colorPctText(promedio)}`}>
+          {promedio}%
+        </p>
+        <p className="mt-2 mb-4 text-sm text-white/50">
           {clasesAsistidas} de {totalClases} clases asistidas
         </p>
-        <div
-          style={{
-            height: 12,
-            borderRadius: 999,
-            background: '#333',
-            overflow: 'hidden',
-            maxWidth: '100%',
-          }}
-        >
+        <div className="h-2 w-full overflow-hidden rounded-full bg-white/10">
           <div
-            style={{
-              height: '100%',
-              width: `${Math.min(100, promedio)}%`,
-              background: col,
-              transition: 'width 0.25s ease',
-            }}
+            className={`h-full rounded-full transition-all duration-500 ${colorPctBg(promedio)}`}
+            style={{ width: `${Math.min(100, promedio)}%` }}
           />
         </div>
-      </section>
+      </Card>
 
+      {/* ── Historial ── */}
       <section className="flex flex-col gap-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <h2 className="text-sm font-semibold text-[#aaa] md:text-base">Historial por mes</h2>
-          <label className="flex min-h-[44px] items-center gap-2 text-sm text-[#bbb] md:text-base">
+          <h2 className="text-sm font-semibold text-dojo-dorado md:text-base">
+            Historial por mes
+          </h2>
+          <label className="flex min-h-[44px] items-center gap-2 text-sm text-white/60">
             Filtrar
             <select
               value={filtroMes}
               onChange={(e) => setFiltroMes(e.target.value)}
-              className="min-h-[44px] flex-1 rounded-md sm:flex-initial"
-              style={{
-                background: '#141414',
-                color: '#eee',
-                border: `1px solid ${DOJO.rojo}`,
-                padding: '0.3rem 0.45rem',
-                fontSize: '0.85rem',
-              }}
+              className="min-h-[44px] flex-1 rounded-md border border-white/15 bg-dojo-negro px-3 py-2 text-sm text-white focus:border-dojo-dorado focus:outline-none sm:flex-initial"
             >
               {mesesOpciones.map((m) => (
                 <option key={m} value={m}>
@@ -199,14 +197,13 @@ export default function KaratecaAsistenciaPage() {
         ) : (
           <div className="flex flex-col gap-3 md:gap-4">
             {mesesFiltrados.map((bloque) => {
-              const c = colorPct(bloque.pct);
+              const badgeClass = colorPctBadge(bloque.pct);
               const headerInner = (
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <h3 className="m-0 text-base capitalize text-white md:text-lg">{bloque.label}</h3>
-                  <span
-                    className="rounded-full px-2 py-0.5 text-xs font-extrabold"
-                    style={{ background: c, color: DOJO.negro }}
-                  >
+                  <h3 className="m-0 text-base font-semibold capitalize text-white md:text-lg">
+                    {bloque.label}
+                  </h3>
+                  <span className={`rounded-full px-2.5 py-0.5 text-xs font-extrabold ${badgeClass}`}>
                     {bloque.pct}%
                   </span>
                 </div>
@@ -216,10 +213,10 @@ export default function KaratecaAsistenciaPage() {
                   {bloque.items.map((a) => (
                     <li
                       key={a.id}
-                      className="flex items-center gap-2 border-b border-[#2a2a2a] py-2 text-sm md:text-base"
+                      className="flex items-center gap-2 border-b border-white/5 py-2 text-sm md:text-base"
                     >
                       <span className="text-base">{a.presente ? '✅' : '❌'}</span>
-                      <span className="text-[#ccc]">
+                      <span className="text-white/70">
                         {new Date(a.fecha).toLocaleDateString('es-ES', {
                           weekday: 'short',
                           day: 'numeric',
@@ -232,19 +229,13 @@ export default function KaratecaAsistenciaPage() {
               );
               return (
                 <div key={bloque.ym}>
-                  <details
-                    className="rounded-lg border bg-[#1a1a1a] lg:hidden"
-                    style={{ borderColor: DOJO.dorado }}
-                  >
+                  <details className="rounded-lg border border-dojo-dorado/25 bg-dojo-surface lg:hidden">
                     <summary className="min-h-[44px] cursor-pointer list-none p-4 [&::-webkit-details-marker]:hidden">
                       {headerInner}
                     </summary>
-                    <div className="border-t border-[#2a2a2a] px-4 pb-4 pt-2">{listInner}</div>
+                    <div className="border-t border-white/10 px-4 pb-4 pt-2">{listInner}</div>
                   </details>
-                  <article
-                    className="hidden rounded-lg border bg-[#1a1a1a] p-4 lg:block"
-                    style={{ borderColor: DOJO.dorado }}
-                  >
+                  <article className="hidden rounded-lg border border-dojo-dorado/25 bg-dojo-surface p-4 lg:block">
                     <div className="mb-3">{headerInner}</div>
                     {listInner}
                   </article>
