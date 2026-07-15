@@ -33,7 +33,7 @@ export default function Login() {
   });
 
   useEffect(() => {
-    document.title = 'Iniciar sesión — Budokan';
+    document.title = 'Iniciar sesión — Kensho';
   }, []);
 
   if (hydrated && isAuthenticated && user) {
@@ -94,15 +94,14 @@ export default function Login() {
               style={{ width: 80, height: 80, transform: 'rotate(45deg)' }}
             />
             <span className="relative z-10 text-[2rem] font-black leading-none text-dojo-dorado">
-              B
+              K
             </span>
           </div>
 
           <div className="flex flex-col items-center gap-3">
             <p className="font-bold tracking-[0.3em] text-dojo-dorado" style={{ fontSize: '1.1rem' }}>
-              BUDOKAN SKIF
+              KENSHO
             </p>
-            <p className="text-sm text-white/40">Dojo · El Carmen de Viboral</p>
             <div className="h-px w-[120px] bg-dojo-dorado/20" />
             <p className="max-w-[240px] text-center text-sm italic text-white/35">
               "El camino del karate es una búsqueda constante de perfección"
@@ -116,7 +115,7 @@ export default function Login() {
         <div className="w-full max-w-[380px]">
           {/* Breadcrumb label */}
           <p className="mb-5 text-xs tracking-widest text-dojo-dorado/60 uppercase">
-            BUDOKAN SKIF
+            KENSHO
           </p>
 
           {/* Heading */}

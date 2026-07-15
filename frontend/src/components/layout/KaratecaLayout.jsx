@@ -80,12 +80,9 @@ export default function KaratecaLayout() {
                 className="absolute border-2 border-dojo-dorado"
                 style={{ width: 32, height: 32, transform: 'rotate(45deg)' }}
               />
-              <span className="relative z-10 text-sm font-black leading-none text-dojo-dorado">B</span>
+              <span className="relative z-10 text-sm font-black leading-none text-dojo-dorado">K</span>
             </div>
-            <div>
-              <p className="text-xs font-bold tracking-[0.2em] text-dojo-dorado">BUDOKAN SKIF</p>
-              <p className="text-[10px] uppercase tracking-wider text-white/40">El Carmen de Viboral</p>
-            </div>
+            <p className="text-xs font-bold tracking-[0.2em] text-dojo-dorado">KENSHO</p>
           </div>
           <button
             type="button"
@@ -172,7 +169,7 @@ export default function KaratecaLayout() {
           <Menu className="h-5 w-5" aria-hidden />
         </button>
 
-        <span className="text-xs font-bold tracking-[0.2em] text-dojo-dorado">BUDOKAN SKIF</span>
+        <span className="text-xs font-bold tracking-[0.2em] text-dojo-dorado">KENSHO</span>
 
         {user ? (
           <div
@@ -200,12 +197,9 @@ export default function KaratecaLayout() {
                 className="absolute border-2 border-dojo-dorado"
                 style={{ width: 32, height: 32, transform: 'rotate(45deg)' }}
               />
-              <span className="relative z-10 text-sm font-black leading-none text-dojo-dorado">B</span>
+              <span className="relative z-10 text-sm font-black leading-none text-dojo-dorado">K</span>
             </div>
-            <div>
-              <p className="text-xs font-bold tracking-[0.2em] text-dojo-dorado">BUDOKAN SKIF</p>
-              <p className="text-[10px] uppercase tracking-wider text-white/40">El Carmen de Viboral</p>
-            </div>
+            <p className="text-xs font-bold tracking-[0.2em] text-dojo-dorado">KENSHO</p>
           </div>
 
           {/* Right: nav + avatar + logout */}
