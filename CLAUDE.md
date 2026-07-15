@@ -308,3 +308,30 @@ other artifacts to it, do not inflate it. ADRs go in `/docs/`.
 ### Fix bugs or add features
 `engineering-senior-developer`. Understand context first, write tests, small
 commits, verify against the smoke checklist before merge.
+
+## Documentation contract (mandatory — every agent, every phase)
+
+No agent finishes without leaving a written trace. Undocumented work does not
+count as done.
+
+**Audit agents** → `docs/audit/<name>.md`. Full report structure, evidence
+(`path:line` or command output) for every claim, and an explicit
+"Out of scope / not verified" section.
+
+**Implementation agents** → append an entry to `docs/CHANGELOG-session.md`:
+- What changed, and which finding ID it closes (SEC-01, MAP-03…)
+- Files touched
+- What was verified after the change, and how
+- What was deliberately NOT done, and why
+
+**Any agent that makes a decision** (not a fix) → an ADR in `docs/adr/`, format
+`NNN-short-title.md`: Context / Decision / Consequences / Alternatives rejected.
+The argument FOR the current decision must be present, not only the critique.
+
+Rules for all written output:
+- A claim without evidence is not written. Uncertain → "not verified".
+- No marketing adjectives: no "robust", "scalable", "best practice".
+- Estimates in real time (minutes/hours), never "quick" or "simple".
+- English. (Docs English, UI Spanish — see Positioning.)
+- Contradicting CLAUDE.md is allowed and expected. Say so explicitly and show
+  the evidence. This file has been wrong before.
