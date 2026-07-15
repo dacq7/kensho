@@ -8,7 +8,7 @@ const useAuthStore = create((set) => ({
   hydrated: false,
 
   login: (user, token) => {
-    localStorage.setItem('budokan_token', token);
+    localStorage.setItem('kensho_token', token);
     set({
       user,
       token,
@@ -18,7 +18,7 @@ const useAuthStore = create((set) => ({
   },
 
   logout: () => {
-    localStorage.removeItem('budokan_token');
+    localStorage.removeItem('kensho_token');
     set({
       user: null,
       token: null,
@@ -27,7 +27,7 @@ const useAuthStore = create((set) => ({
   },
 
   initAuth: async () => {
-    const stored = localStorage.getItem('budokan_token');
+    const stored = localStorage.getItem('kensho_token');
     if (!stored) {
       set({
         user: null,
@@ -49,7 +49,7 @@ const useAuthStore = create((set) => ({
         hydrated: true,
       });
     } catch {
-      localStorage.removeItem('budokan_token');
+      localStorage.removeItem('kensho_token');
       set({
         user: null,
         token: null,

@@ -5,7 +5,7 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('budokan_token');
+  const token = localStorage.getItem('kensho_token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -19,7 +19,7 @@ api.interceptors.response.use(
     const url = String(error.config?.url ?? '');
 
     if (status === 401) {
-      localStorage.removeItem('budokan_token');
+      localStorage.removeItem('kensho_token');
       const skipRedirect =
         url.includes('/auth/login') || url.includes('/auth/me');
       if (!skipRedirect) {

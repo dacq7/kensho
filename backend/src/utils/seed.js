@@ -3,7 +3,7 @@ require('dotenv').config();
 const bcrypt = require('bcryptjs');
 const { prisma } = require('../lib/prisma');
 
-const nombre = process.env.SENSEI_NOMBRE || 'Sensei Budokan';
+const nombre = process.env.SENSEI_NOMBRE || 'Sensei Kensho';
 const tipoDocumento = process.env.SENSEI_TIPO_DOC || 'CC';
 const numeroDocumento = process.env.SENSEI_DOCUMENTO || '00000000';
 const passwordPlana = process.env.SENSEI_PASSWORD || 'budokan2025';

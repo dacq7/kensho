@@ -48,7 +48,7 @@ export default function SenseiLayout() {
       to.endsWith('dashboard')
         ? location.pathname === to
         : location.pathname.startsWith(to)
-    )?.label ?? 'Budokan';
+    )?.label ?? 'Kensho';
 
   return (
     <div className="min-h-screen flex bg-dojo-negro text-white">
@@ -79,18 +79,13 @@ export default function SenseiLayout() {
                 style={{ width: 40, height: 40, transform: 'rotate(45deg)' }}
               />
               <span className="relative z-10 text-lg font-black leading-none text-dojo-dorado">
-                B
+                K
               </span>
             </div>
 
-            <div>
-              <p className="text-sm font-bold tracking-[0.2em] text-dojo-dorado">
-                BUDOKAN SKIF
-              </p>
-              <p className="text-[10px] uppercase tracking-wider text-white/40">
-                El Carmen de Viboral
-              </p>
-            </div>
+            <p className="text-sm font-bold tracking-[0.2em] text-dojo-dorado">
+              KENSHO
+            </p>
           </div>
 
           {/* Close button (mobile) */}
