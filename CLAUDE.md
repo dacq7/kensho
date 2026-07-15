@@ -121,19 +121,31 @@ Classify every "budokan" hit before touching it. A global `sed` breaks productio
 
 1. **Brand (user-facing)** — titles, copy, `<title>`, README, meta tags, footer.
    → Change today.
-2. **Infrastructure (identifiers)** — DB name (`budokan`), CORS origins, JWT
-   issuer, Railway project (`budokan-app-production`), Vercel project
-   (`budokan-app`), `.env` values.
+2. **Infrastructure (identifiers)** — DB name (`budokan`), Railway project
+   (`budokan-app-production`), Vercel project (`budokan-app`), `.env` values.
    → **DO NOT TOUCH TODAY.** Changing these breaks prod. Backlog.
+   No CORS origin list and no JWT issuer exist — verified 2026-07-15:
+   `backend/src/index.js:18` is a bare `cors()`, `backend/src/utils/jwt.js:3` is a
+   bare `process.env.JWT_SECRET`. Both were previously listed here in error.
 3. **History** — git log, migration folder names, the GitHub redirect from
    `dacq7/budokan-app`.
    → Leave. Client approved. Part of the case-study narrative.
-4. **Functional strings that look like brand** — `budokan_token` (localStorage
-   key, 5 occurrences: request interceptor, `login`, `logout`, 401 handler,
-   `initAuth`), cookie names, cache keys, analytics events.
-   → **All together or none. Never by global `sed`.** A partial rename breaks
+4. **Functional strings that look like brand** — `budokan_token`, the localStorage
+   key. **6 occurrences, not 5** — verified 2026-07-15 by grep over the whole repo:
+   - `frontend/src/lib/api.js:8` — request interceptor (read)
+   - `frontend/src/lib/api.js:22` — 401 response handler (remove)
+   - `frontend/src/store/authStore.js:11` — `login` (write)
+   - `frontend/src/store/authStore.js:21` — `logout` (remove)
+   - `frontend/src/store/authStore.js:30` — `initAuth` (read)
+   - `frontend/src/store/authStore.js:52` — **`initAuth` catch block (remove) —
+     this one was missing from the list of 5 previously stated here.**
+
+   No cookie names, cache keys or sessionStorage keys carry the brand — none exist.
+   `budokan_token` is the only functional brand identifier in the codebase.
+   → **All 6 together or none. Never by global `sed`.** A partial rename breaks
    auth silently: login writes one key, the interceptor reads another. A 3-minute
-   smoke test will not catch it.
+   smoke test will not catch it. Note the failure mode of the old list: renaming
+   exactly the 5 sites it named leaves `:52` writing to a dead key.
 
 Special case: `budokan-app.vercel.app` is **both** brand (first thing in the
 README) and infra (the hostname is the Vercel project name). Renaming the project
@@ -153,11 +165,10 @@ today's work.
   worse than either alone. Migrating to httpOnly cookies touches backend + CORS.
   Backlog + ADR.
 - `x-powered-by: Express` leaks the stack. `helmet()` fixes it. Backlog.
-- **`User.password` is a plain model field and Prisma 5.22 has no stable `omit`.
-  Any `findMany`/`findUnique` on `User` without an explicit `select` returns the
-  bcrypt hash in the API response.** Audit every User query. If one is exposed,
-  fix today — it is a 5-minute `select`, no migration. This is the one bug that
-  would actually embarrass the portfolio launch.
+- `User.password` is correctly excluded from all API responses — verified
+  2026-07-15 across 13 queries. Previously listed here as a finding in error.
+- `backend/src/utils/seed.js:9` — `process.env.SENSEI_PASSWORD || 'budokan2025'`.
+  Hardcoded fallback password. **Do NOT touch today** — see backlog.
 - Good: login returns a generic "Credenciales incorrectas" — no user enumeration.
   Keep it that way.
 
@@ -272,6 +283,10 @@ Installed in `~/.claude/skills/`:
   live data.
 - **Do not touch infrastructure identifiers today.** See rebrand category 2.
 - **Do not run a global `sed` for budokan → kensho.** See rebrand category 4.
+- **Do not touch `nixpacks.toml` today.** It does not parse: line 1 is literally
+  `toml[phases.setup]` — a pasted markdown fence tag, verified with `od -c` on
+  2026-07-15. Repairing it would make the next deploy run `prisma migrate deploy`
+  against the production database for the first time. Backlog + ADR.
 - **Do not commit secrets.** Check `.gitignore` before committing anything from
   `.env`.
 - **Do not include real dojo data.** All example data fictional.
