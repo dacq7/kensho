@@ -307,13 +307,19 @@ Line coverage is 15.72%, concentrated on auth and student management. `role.midd
 
 ---
 
+## Shipped
+
+**Demo hardening** — 2026-07-15. The public demo accepts writes by design: the credentials above are published, and every write endpoint is open to whoever holds them. A visitor can change a demo account's password via self-service and lock out everyone after them. This happened once and went unnoticed for months, which is the real lesson: the problem was detection, not prevention. Rather than guard each write path, the database is reseeded every 6 hours by a scheduled Railway service (`kensho-reseed`, running `npm run seed:demo`). The demo is disposable rather than defended — break it freely, it resets.
+
+**Custom domain** — 2026-07-15. `kensho.veridisdev.com` was added to the existing Vercel project rather than renaming it. Renaming would have killed the `.vercel.app` hostname without a redirect and left it claimable by anyone.
+
+---
+
 ## Roadmap
 
 Known gaps, listed deliberately. Each is a decision with a reason, not an oversight.
 
-**Demo hardening** — the public demo accepts writes by design: the credentials above are published, and every write endpoint is open to whoever holds them. A visitor can change a demo account's password via self-service and lock out everyone after them. This has already happened once and went unnoticed for months. The fix is not a write guard — it is a scheduled reseed, so the demo is disposable rather than defended. Infrastructure work, next.
-
-**Continuous integration** — there is none. Pushing to `main` deploys to Vercel and Railway with no gate; nothing runs the suite automatically. The Tests badge above is hand-written and will rot. A GitHub Actions workflow makes it real.
+**Continuous integration** — there is none. Pushing to `main` deploys to Vercel and Railway with no gate; nothing runs the suite automatically. The Tests badge above is hand-written and will rot. A GitHub Actions workflow makes it real. Next.
 
 **Schema** — requires migrations against live data, hence deferred:
 - No `@@unique([karatecaId, mes])` on `Mensualidad` — the same student can be billed twice for one month
@@ -326,8 +332,9 @@ Known gaps, listed deliberately. Each is a decision with a reason, not an oversi
 
 **Security** — `access-control-allow-origin: *`, JWT in `localStorage` (XSS-readable), no `helmet()`. Moving to httpOnly cookies means backend changes, a fixed CORS origin and new CSRF protection — a 4–6h change, not a flag.
 
-**Frontend** — no test framework configured.
+**Brand identifiers in infrastructure** — the Railway service is still `budokan-app`, the database is `budokan`, and `seed.js` defaults to `sensei@budokan.com`. That last one is a functional identifier disguised as a brand string: `User.email` is `@unique` and the seed has already run, so changing the default tries to create a second sensei rather than rename the first. They move together or not at all.
 
+**Frontend** — no test framework configured.
 ---
 
 ## License
