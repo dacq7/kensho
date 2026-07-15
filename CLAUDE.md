@@ -45,6 +45,23 @@ Colombian. API surface and documentation are English. UI is Spanish. See ADR.
   real enrolment flow: the sensei has each student's ID; students may not have
   email.
 
+**Brand string: "Kensho", single word.** User-facing brand strings today are
+"BUDOKAN SKIF" (two words) at 6 sites, plus "Budokan" alone at 2 more
+(`frontend/src/components/layout/SenseiLayout.jsx:51`, `frontend/src/pages/Login.jsx:36`)
+— verified 2026-07-15. SKIF is a real karate federation. Kensho is a fictional
+dojo and cannot claim affiliation to a real federation — that would be a false
+statement about a third party. Decision (2026-07-15): SKIF appears in no
+artifact. UI and docs say "Kensho", clean.
+
+Note for implementation: at the 6 "BUDOKAN SKIF" sites this is two words → one
+word. Header widths, logo areas and any layout assuming two lines will shift.
+Those are not a 1:1 string swap — check the codebase map for the affected
+components. The 2 single-word "Budokan" sites are a 1:1 swap.
+
+Evidence that this was real client work does not depend on SKIF. It lives in the
+schema: the `Poliza` model (per-student insurance, a Colombian dojo requirement)
+and login by `numeroDocumento` (national ID, from the real enrolment flow).
+
 ## Historical context
 
 Originally called **Budokan**, built for a specific karate dojo (name kept
