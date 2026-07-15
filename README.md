@@ -2,7 +2,7 @@
 
 Production-ready full-stack web application for managing a karate dojo — students, attendance, payments, insurance policies and equipment inventory.
 
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-online-black?style=flat-square)](https://budokan-app.vercel.app) [![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black)](https://react.dev) [![Node.js](https://img.shields.io/badge/Node.js-18+-339933?style=flat-square&logo=node.js&logoColor=white)](https://nodejs.org) [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=flat-square&logo=postgresql&logoColor=white)](https://postgresql.org) [![Tests](https://img.shields.io/badge/Tests-26%20passing-brightgreen?style=flat-square)](https://github.com/dacq7/kensho) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](LICENSE)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-online-black?style=flat-square)](https://kensho.veridisdev.com) [![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black)](https://react.dev) [![Node.js](https://img.shields.io/badge/Node.js-18+-339933?style=flat-square&logo=node.js&logoColor=white)](https://nodejs.org) [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=flat-square&logo=postgresql&logoColor=white)](https://postgresql.org) [![Tests](https://img.shields.io/badge/Tests-26%20passing-brightgreen?style=flat-square)](https://github.com/dacq7/kensho) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](LICENSE)
 
 ---
 
@@ -275,7 +275,7 @@ Seeds one sensei and four karatecas with attendance, fees, policies and inventor
 
 ### Live Demo
 
-**[→ Open Live Demo](https://budokan-app.vercel.app)**
+**[→ Open Live Demo](https://kensho.veridisdev.com)**
 
 | Role | Document | Password |
 |------|----------|----------|
